@@ -51,11 +51,9 @@ pub fn roman_to_int(s: String) -> i32 {
         let int_val = *map.get(&x).unwrap();
         if int_val < pre {
             total = total - int_val;
-            println!("total: {}, prev: {}", total, pre);
             pre = int_val;
         } else {
             total = total + int_val;
-            println!("total: {}, prev: {}", total, pre);
             pre = int_val;
         }
     }
@@ -211,10 +209,8 @@ pub fn search_insert(nums: Vec<i32>, target: i32) -> i32 {
     }
     let mut first: usize = 0;
     let mut last: usize = nums.len();
-    let mid = 0;
     while first < last {
         let mid = first + (last - first) / 2;
-        println!("f:{},l:{},m:{}", first, last, mid);
         if nums[mid] == target {
             return mid as i32;
         } else if nums[mid] < target {
@@ -223,7 +219,6 @@ pub fn search_insert(nums: Vec<i32>, target: i32) -> i32 {
             last = mid;
         }
     }
-    println!("{},{},{}", first, last, mid);
     last as i32
 }
 
@@ -234,8 +229,9 @@ pub fn length_of_last_word(s: String) -> i32 {
     let mut s_len = s.len();
     let mut count: i32 = 0;
     let mut first_non_whitespace_encountered = false;
+    let mut chars =  s.chars();
     while s_len > 0 {
-        let ch = s.chars().nth(s_len - 1).unwrap();
+        let ch = chars.nth(s_len - 1).unwrap();
         if ch == ' ' && first_non_whitespace_encountered {
             return count;
         }
