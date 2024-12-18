@@ -229,9 +229,8 @@ pub fn length_of_last_word(s: String) -> i32 {
     let mut s_len = s.len();
     let mut count: i32 = 0;
     let mut first_non_whitespace_encountered = false;
-    let mut chars =  s.chars();
     while s_len > 0 {
-        let ch = chars.nth(s_len - 1).unwrap();
+        let ch = s.chars().nth(s_len - 1).unwrap();
         if ch == ' ' && first_non_whitespace_encountered {
             return count;
         }
@@ -254,4 +253,265 @@ pub fn plus_one(mut digits: Vec<i32>) -> Vec<i32> {
     }
     digits.insert(0, 1);
     digits
+}
+
+pub fn add_binary(a: String, b: String) -> String {
+    if a.is_empty() {
+        return b;
+    }
+    if b.is_empty() {
+        return a;
+    }
+
+    let mut result = String::new();
+    let mut rem = 0;
+
+    let a_chars: Vec<char> = a.chars().collect();
+    let b_chars: Vec<char> = b.chars().collect();
+
+    let al = a_chars.len();
+    let bl = b_chars.len();
+    let max_len = al.max(bl);
+
+    for i in 0..max_len {
+        let ac = if i < al {
+            a_chars[al - 1 - i] as i32 - 48
+        } else {
+            0
+        };
+        let bc = if i < bl {
+            b_chars[bl - 1 - i] as i32 - 48
+        } else {
+            0
+        };
+
+        let temp = ac + bc + rem;
+        rem = temp / 2;
+        result.push((temp % 2 + 48) as u8 as char);
+    }
+
+    if rem != 0 {
+        result.push('1');
+    }
+
+    result.chars().rev().collect()
+}
+
+pub fn my_sqrt(x: i32) -> i32 {
+    let x = x as i64;
+    let mut left: i64 = 0;
+    let mut right = x;
+    while left <= right {
+        let mid = left + (right - left) / 2;
+        if mid * mid == x {
+            return mid as i32;
+        } else if mid * mid > x {
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+    right as i32
+}
+
+pub fn climb_stairs(n: i32) -> i32 {
+    if n <= 3 {
+        return n;
+    }
+    let mut nth1 = 2;
+    let mut nth2 = 3;
+    let mut n = n;
+    while n > 3 {
+        let temp = nth1 + nth2;
+        nth1 = nth2;
+        nth2 = temp;
+        n -= 1;
+    }
+    nth2
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn two_sum() {
+        assert_eq!(super::two_sum(vec![2, 7, 11, 15], 9), vec![0, 1]);
+        assert_eq!(super::two_sum(vec![3, 2, 4], 6), vec![1, 2]);
+    }
+
+    #[test]
+    fn palindrome() {
+        assert_eq!(super::palindrome(121), true);
+        assert_eq!(super::palindrome(12), false);
+        assert_eq!(super::palindrome(-12), false);
+    }
+
+    #[test]
+    fn roman_to_int() {
+        assert_eq!(super::roman_to_int(String::from("III")), 3);
+        assert_eq!(super::roman_to_int(String::from("IV")), 4);
+        assert_eq!(super::roman_to_int(String::from("IX")), 9);
+        assert_eq!(super::roman_to_int(String::from("LVIII")), 58);
+        assert_eq!(super::roman_to_int(String::from("MCMXCIV")), 1994);
+        assert_eq!(super::roman_to_int(String::from("MCMXCV")), 1995);
+    }
+
+    #[test]
+    fn longest_common_prefix() {
+        assert_eq!(
+            super::longest_common_prefix(vec![String::from("")]),
+            String::from("")
+        );
+        assert_eq!(
+            super::longest_common_prefix(vec![String::from("III"), String::from("I")]),
+            String::from("I")
+        );
+    }
+
+    #[test]
+    fn is_valid_parentheses() {
+        assert_eq!(super::is_valid_parentheses(String::from("")), false);
+        assert_eq!(super::is_valid_parentheses(String::from("{}")), true);
+        assert_eq!(super::is_valid_parentheses(String::from("()[]{}")), true);
+        assert_eq!(super::is_valid_parentheses(String::from("()[]}")), false);
+        assert_eq!(super::is_valid_parentheses(String::from("(]")), false);
+        assert_eq!(super::is_valid_parentheses(String::from("({[)")), false);
+    }
+
+    #[test]
+    fn remove_duplicates() {
+        assert_eq!(super::remove_duplicates(&mut vec![0, 0, 1, 2, 3, 4]), 5)
+    }
+
+    fn create_list(values: Vec<i32>) -> Option<Box<ListNode>> {
+        let mut head = None;
+        for &val in values.iter().rev() {
+            let mut new_node = ListNode::new(val);
+            new_node.next = head;
+            head = Some(Box::new(new_node));
+        }
+        head
+    }
+
+    #[test]
+    fn merge_two_sorted_lists_both_non_empty() {
+        let list1 = create_list(vec![1, 3, 5]);
+        let list2 = create_list(vec![2, 4, 6]);
+        let result = super::merge_two_lists(list1, list2);
+        let expected = create_list(vec![1, 2, 3, 4, 5, 6]);
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn merge_two_sorted_lists_one_empty() {
+        let list1 = create_list(vec![1, 2, 3]);
+        let list2: Option<Box<super::ListNode>> = None;
+        let result = super::merge_two_lists(list1, list2);
+        let expected = create_list(vec![1, 2, 3]);
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn merge_two_sorted_lists_both_empty() {
+        let list1: Option<Box<super::ListNode>> = None;
+        let list2: Option<Box<super::ListNode>> = None;
+        let result = super::merge_two_lists(list1, list2);
+        let expected: Option<Box<super::ListNode>> = None;
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn merge_two_sorted_lists_with_duplicates() {
+        let list1 = create_list(vec![1, 2, 4]);
+        let list2 = create_list(vec![1, 3, 4]);
+        let result = super::merge_two_lists(list1, list2);
+        let expected = create_list(vec![1, 1, 2, 3, 4, 4]);
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn remove_element() {
+        assert_eq!(super::remove_element(&mut vec![1, 2, 1, 2], 2), 2)
+    }
+
+    #[test]
+    fn str_str() {
+        assert_eq!(
+            super::str_str(String::from("saddffsad"), String::from("sad")),
+            0
+        );
+        assert_eq!(
+            super::str_str(String::from("saddffsad"), String::from("sada")),
+            -1
+        );
+        assert_eq!(super::str_str(String::from("a"), String::from("a")), 0);
+    }
+
+    #[test]
+    fn search_insert() {
+        assert_eq!(super::search_insert(vec![1, 2, 3, 4, 5, 6, 7, 8, 9], 3), 2);
+        assert_eq!(super::search_insert(vec![-32, 1, 12, 82], -32), 0);
+        assert_eq!(super::search_insert(vec![1, 3, 5, 6], 2), 1);
+        assert_eq!(super::search_insert(vec![3, 5, 6], 2), 0);
+        assert_eq!(super::search_insert(vec![3, 5, 6], 4), 1);
+        assert_eq!(super::search_insert(vec![3, 5, 7], 6), 2);
+    }
+
+    #[test]
+    fn length_of_last_word() {
+        assert_eq!(super::length_of_last_word(String::from("")), 0);
+        assert_eq!(super::length_of_last_word(String::from("Hello World ")), 5);
+    }
+
+    #[test]
+    fn plus_one() {
+        assert_eq!(super::plus_one(vec![1, 2, 3]), vec![1, 2, 4]);
+        assert_eq!(super::plus_one(vec![8]), vec![9]);
+        assert_eq!(super::plus_one(vec![9]), vec![1, 0]);
+    }
+
+    #[test]
+    fn my_sqrt() {
+        assert_eq!(2, super::my_sqrt(4));
+        assert_eq!(3, super::my_sqrt(9));
+        assert_eq!(4, super::my_sqrt(16));
+        assert_eq!(2, super::my_sqrt(8));
+        assert_eq!(46339, super::my_sqrt(2147395599));
+    }
+
+    #[test]
+    fn climb_stairs() {
+        assert_eq!(1, super::climb_stairs(1));
+        assert_eq!(2, super::climb_stairs(2));
+        assert_eq!(3, super::climb_stairs(3));
+        assert_eq!(5, super::climb_stairs(4));
+    }
+
+    #[test]
+    fn add_binary() {
+        assert_eq!(
+            super::add_binary(String::from(""), String::from("1")),
+            String::from("1")
+        );
+        assert_eq!(
+            super::add_binary(String::from("1"), String::from("")),
+            String::from("1")
+        );
+        assert_eq!(
+            super::add_binary(String::from("111"), String::from("101")),
+            String::from("1100")
+        );
+        assert_eq!(
+            super::add_binary(String::from("1111"), String::from("1")),
+            String::from("10000")
+        );
+        assert_eq!(
+            super::add_binary(String::from("1010"), String::from("1011")),
+            String::from("10101")
+        );
+    }
 }
