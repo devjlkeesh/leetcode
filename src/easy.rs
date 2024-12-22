@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::rc::Rc;
+use std::vec;
 
 pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
     let mut map: HashMap<i32, usize> = HashMap::with_capacity(nums.len());
@@ -330,6 +332,86 @@ pub fn climb_stairs(n: i32) -> i32 {
     nth2
 }
 
+pub fn delete_duplicates(head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+    // let mut head = head;
+    // let mut current = &mut head;
+    //
+    // while let Some(ref mut node) = current {
+    //     if let Some(ref mut next_node) = node.next {
+    //         if node.val == next_node.val {
+    //             node.next = next_node.next.take();
+    //         } else {
+    //             current = &mut node.next;
+    //         }
+    //     } else {
+    //         break;
+    //     }
+    // }
+
+    head
+}
+
+pub fn merge(nums1: &mut Vec<i32>, m: i32, nums2: &mut Vec<i32>, n: i32) {
+    let mut i = m - 1;
+    let mut j = n - 1;
+    let mut k = m + n - 1;
+    while i >= 0 && j >= 0 {
+        if nums1[i as usize] > nums2[j as usize] {
+            nums1[k as usize] = nums1[i as usize];
+            i -= 1;
+        } else {
+            nums1[k as usize] = nums2[j as usize];
+
+            j -= 1;
+        }
+        k -= 1;
+    }
+    while j >= 0 {
+        nums1[k as usize] = nums2[j as usize];
+        j -= 1;
+        k -= 1;
+    }
+}
+
+pub fn generate_pascal_triangle(num_rows: i32) -> Vec<Vec<i32>> {
+    if num_rows == 0 {
+        return vec![];
+    }
+    if num_rows <= 1 {
+        return vec![vec![1]];
+    }
+    let mut result = vec![vec![1]];
+
+    for i in 1..(num_rows as usize) {
+        let mut row = vec![1];
+        let prev_row = &result[i - 1];
+        for j in 1..i {
+            row.push(prev_row[j - 1] + prev_row[j]);
+        }
+        row.push(1);
+        result.push(row);
+    }
+    result
+}
+pub fn generate_pascal_triangle_nth_row(row_index: i32) -> Vec<i32> {
+    if row_index == 0 {
+        return vec![1];
+    }
+    if row_index <= 1 {
+        return vec![1, 1];
+    }
+    let mut prev_row = vec![1, 1];
+    for i in 2..=(row_index as usize) {
+        let mut row = vec![1];
+        for j in 1..i {
+            row.push(prev_row[j - 1] + prev_row[j]);
+        }
+        row.push(1);
+        prev_row = row;
+    }
+    prev_row
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -513,5 +595,58 @@ mod tests {
             super::add_binary(String::from("1010"), String::from("1011")),
             String::from("10101")
         );
+    }
+
+    // #[test]
+    fn remove_duplicates_from_sorted_list() {
+        // Input: 1 -> 1 -> 2
+        let node3 = Some(Box::new(ListNode { val: 2, next: None }));
+        let node2 = Some(Box::new(ListNode {
+            val: 1,
+            next: node3,
+        }));
+        let head = Some(Box::new(ListNode {
+            val: 1,
+            next: node2,
+        }));
+
+        let expected = Some(Box::new(ListNode {
+            val: 1,
+            next: Some(Box::new(ListNode { val: 2, next: None })),
+        }));
+
+        assert_eq!(expected, delete_duplicates(head));
+    }
+
+    #[test]
+    fn merge() {
+        let nums1 = &mut vec![1, 2, 3, 0, 0, 0];
+        let excepted = vec![1, 2, 2, 3, 5, 6];
+        super::merge(nums1, 3, &mut vec![2, 5, 6], 3);
+        assert_eq!(excepted, *nums1);
+    }
+
+    #[test]
+    fn generate_pascal_triangle() {
+        assert_eq!(vec![vec![1]], super::generate_pascal_triangle(1));
+        assert_eq!(
+            vec![vec![1], vec![1, 1]],
+            super::generate_pascal_triangle(2)
+        );
+        assert_eq!(
+            vec![vec![1], vec![1, 1], vec![1, 2, 1]],
+            super::generate_pascal_triangle(3)
+        );
+        assert_eq!(
+            vec![vec![1], vec![1, 1], vec![1, 2, 1], vec![1, 3, 3, 1]],
+            super::generate_pascal_triangle(4)
+        );
+    }
+    #[test]
+    fn generate_pascal_triangle_nth_row() {
+        assert_eq!(vec![1], super::generate_pascal_triangle_nth_row(0));
+        assert_eq!(vec![1, 1], super::generate_pascal_triangle_nth_row(1));
+        assert_eq!(vec![1, 2, 1], super::generate_pascal_triangle_nth_row(2));
+        assert_eq!(vec![1, 3, 3, 1], super::generate_pascal_triangle_nth_row(3));
     }
 }
