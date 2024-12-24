@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::rc::Rc;
 use std::vec;
 
 pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
@@ -412,6 +411,36 @@ pub fn generate_pascal_triangle_nth_row(row_index: i32) -> Vec<i32> {
     prev_row
 }
 
+pub fn convert_to_title(mut column_number: i32) -> String {
+    let mut title = String::new();
+    while column_number > 0 {
+        column_number -= 1;
+        title.push(((column_number % 26) as u8 + 65u8) as char);
+        column_number /= 26;
+    }
+    title.chars().rev().collect()
+}
+
+pub fn title_to_number(column_title: String) -> i32 {
+    /* if column_title.len() == 1 {
+        return column_title.chars().nth(0).unwrap() as i32 - 64;
+    }
+    let mut index = column_title.len() as i32 - 1;
+    let mut result = 0;
+    column_title.chars().for_each(|c| {
+       let item = c as i32 - 64;
+        result += item * 26i32.pow(index as u32);
+        index -= 1;
+    });
+    result*/
+    column_title
+        .chars()
+        .rev()
+        .enumerate()
+        .map(|(i, c)| (c as i32 - 64) * 26i32.pow(i as u32))
+        .sum()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -648,5 +677,22 @@ mod tests {
         assert_eq!(vec![1, 1], super::generate_pascal_triangle_nth_row(1));
         assert_eq!(vec![1, 2, 1], super::generate_pascal_triangle_nth_row(2));
         assert_eq!(vec![1, 3, 3, 1], super::generate_pascal_triangle_nth_row(3));
+    }
+
+    #[test]
+    fn convert_to_title() {
+        assert_eq!("ZY", super::convert_to_title(701));
+        assert_eq!("ZZ", super::convert_to_title(702));
+        assert_eq!("AAA", super::convert_to_title(703));
+    }
+
+    #[test]
+    fn title_to_number() {
+        assert_eq!(1, super::title_to_number("A".to_string()));
+        assert_eq!(26, super::title_to_number("Z".to_string()));
+        assert_eq!(25, super::title_to_number("Y".to_string()));
+        assert_eq!(27, super::title_to_number("AA".to_string()));
+        assert_eq!(701, super::title_to_number("ZY".to_string()));
+        assert_eq!(702, super::title_to_number("ZZ".to_string()));
     }
 }
