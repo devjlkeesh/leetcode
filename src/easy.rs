@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::vec;
 
 pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
@@ -441,6 +441,288 @@ pub fn title_to_number(column_title: String) -> i32 {
         .sum()
 }
 
+pub fn is_happy(mut n: i32) -> bool {
+    let mut map = HashSet::new();
+
+    fn digit_sum(mut n: i32) -> i32 {
+        let mut sum = 0;
+        while n > 0 {
+            let remainder = n % 10;
+            sum += remainder * remainder;
+            n = n / 10;
+        }
+        sum
+    }
+
+    while n != 1 {
+        if !map.insert(n) {
+            return false;
+        }
+        n = digit_sum(n);
+    }
+    true
+}
+
+pub fn add_digits(mut num: i32) -> i32 {
+    if num < 10 {
+        return num;
+    }
+    let mut sum = 0;
+    while num > 0 {
+        sum += num % 10;
+        num /= 10;
+    }
+    add_digits(sum)
+}
+pub fn add_digits2(mut num: i32) -> i32 {
+    if num == 0 {
+        return 0;
+    }
+    if num % 9 == 0 {
+        return 9;
+    }
+    num % 9
+}
+
+pub fn is_ugly(mut n: i32) -> bool {
+    if n <= 0 {
+        return false;
+    }
+    while n % 2 == 0 {
+        n /= 2;
+    }
+    while n % 3 == 0 {
+        n /= 3;
+    }
+    while n % 5 == 0 {
+        n /= 5;
+    }
+    n == 1
+}
+
+pub fn missing_number(nums: Vec<i32>) -> i32 {
+    let n = nums.len() as i32;
+    let expected = (n + 1) * (n + 0) / 2;
+    let actual = nums.iter().sum::<i32>();
+    expected - actual
+}
+
+pub fn can_win_nim(n: i32) -> bool {
+    true
+}
+
+pub fn is_power_of_three(mut n: i32) -> bool {
+    if n <= 0 {
+        return false;
+    }
+    while n % 3 == 0 {
+        n /= 3;
+    }
+    n == 1 || n == -1
+}
+
+pub fn is_power_of_four(mut n: i32) -> bool {
+    if n <= 0 {
+        return false;
+    }
+    while n % 4 == 0 {
+        n /= 4;
+    }
+    n == 1 || n == -1
+}
+
+pub fn is_perfect_square(num: i32) -> bool {
+    let num = num as i64;
+    let mut left = 1;
+    let mut right = num;
+    while left <= right {
+        let mut mid = left + (right - left) / 2;
+        if mid * mid == num {
+            return true;
+        } else if mid * mid > num {
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+    false
+}
+
+pub fn to_hex(num: i32) -> String {
+    if num == 0 {
+        return "0".to_string();
+    }
+    let mut num = num as u32;
+    let hex_vector = "0123456789abcdef".chars().collect::<Vec<char>>();
+    let mut result = String::new();
+    while num > 0 {
+        let hex_char_index = (num % 16) as usize;
+        result.push(hex_vector[hex_char_index]);
+        num /= 16;
+    }
+    result.chars().rev().collect()
+}
+
+pub fn fizz_buzz(n: i32) -> Vec<String> {
+    let mut result = vec![];
+    for i in 1..=n {
+        if i % 3 == 0 && i % 5 == 0 {
+            result.push("FizzBuzz".to_string());
+        } else if i % 3 == 0 {
+            result.push("Fizz".to_string());
+        } else if i % 5 == 0 {
+            result.push("Buzz".to_string());
+        } else {
+            result.push(i.to_string());
+        }
+    }
+    result
+}
+
+pub fn add_strings(num1: String, num2: String) -> String {
+    if num1 == "0" {
+        return num2;
+    } else if num2 == "0" {
+        return num1;
+    }
+    let mut n = num1.len() as i32 - 1;
+    let mut m = num2.len() as i32 - 1;
+    let num1_chars = num1.chars().map(|c| c as u8 - b'0').collect::<Vec<_>>();
+    let num2_chars = num2.chars().map(|c| c as u8 - b'0').collect::<Vec<_>>();
+
+    let mut result = String::new();
+    let mut rem = 0;
+
+    while n >= 0 || m >= 0 || rem > 0 {
+        let i = if n >= 0 { num1_chars[n as usize] } else { 0 };
+        let j = if m >= 0 { num2_chars[m as usize] } else { 0 };
+        let sum = i + j + rem;
+        result.push((b'0' + (sum % 10)) as char);
+        rem = sum / 10;
+        n -= 1;
+        m -= 1;
+    }
+    result.chars().rev().collect()
+}
+
+pub fn arrange_coins(n: i32) -> i32 {
+    let k = ((1 + 8 * n) as f64).sqrt() - 1.0;
+    let k = (k / 2.0).floor() as i32;
+    if k * (k + 1) / 2 <= n {
+        k
+    } else {
+        k - 1
+    }
+}
+
+pub fn construct_rectangle(area: i32) -> Vec<i32> {
+    let mut w = (area as f64).sqrt() as i32;
+    while area % w != 0 {
+        w -= 1;
+    }
+    let l = area / w;
+    vec![l, w]
+}
+
+pub fn convert_to_base7(mut num: i32) -> String {
+    if num == 0 {
+        return "0".to_string();
+    }
+    let mut result = String::new();
+    let mut negative = false;
+    if num < 0 {
+        num *= -1;
+        negative = true
+    }
+    while num > 0 {
+        result.push((48u8 + (num % 7) as u8) as char);
+        num /= 7;
+    }
+    if negative {
+        result.push('-');
+    }
+    result.chars().rev().collect()
+}
+
+pub fn check_perfect_number(num: i32) -> bool {
+    if num <= 1 {
+        return false;
+    }
+    let mut divisors_sum = 1;
+    let sqrt_num = (num as f64).sqrt() as i32;
+    for i in 2..=sqrt_num {
+        if num % i == 0 {
+            divisors_sum += i;
+            if i != num / i {
+                divisors_sum += num / i;
+            }
+        }
+    }
+
+    divisors_sum == num
+}
+
+pub fn fib(n: i32) -> i32 {
+    if n <= 1 {
+        return n;
+    }
+    let mut fib0 = 0;
+    let mut fib1 = 1;
+    for i in 2..=n {
+        let temp = fib1;
+        fib1 = fib0 + fib1;
+        fib0 = temp;
+    }
+    fib1
+}
+
+pub fn maximum_product(nums: Vec<i32>) -> i32 {
+    let mut m1 = i32::MIN;
+    let mut m2 = i32::MIN;
+    let mut m3 = i32::MIN;
+    let mut n1 = i32::MAX;
+    let mut n2 = i32::MAX;
+
+    for &num in &nums {
+        if num > m1 {
+            m3 = m2;
+            m2 = m1;
+            m1 = num;
+        } else if num > m2 {
+            m3 = m2;
+            m2 = num;
+        } else if num > m3 {
+            m3 = num;
+        }
+        if num < n1 {
+            n2 = n1;
+            n1 = num;
+        } else if num < n2 {
+            n2 = num;
+        }
+    }
+
+    let p1 = m1 * m2 * m3;
+    let p2 = m1 * n1 * n2;
+    p1.max(p2)
+}
+
+pub fn self_dividing_numbers(left: i32, right: i32) -> Vec<i32> {
+    let mut result = vec![];
+    'out: for i in left..=right {
+        let mut num = i;
+        while num > 0 {
+            let digit = num % 10;
+            if digit == 0 || i % digit != 0 {
+                continue 'out;
+            }
+            num /= 10;
+        }
+        result.push(i);
+    }
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -694,5 +976,144 @@ mod tests {
         assert_eq!(27, super::title_to_number("AA".to_string()));
         assert_eq!(701, super::title_to_number("ZY".to_string()));
         assert_eq!(702, super::title_to_number("ZZ".to_string()));
+    }
+
+    #[test]
+    fn is_happy() {
+        assert_eq!(true, super::is_happy(19));
+        assert_eq!(false, super::is_happy(4));
+    }
+
+    #[test]
+    fn add_digits() {
+        assert_eq!(2, super::add_digits(38));
+        assert_eq!(0, super::add_digits(0));
+        assert_eq!(2, super::add_digits2(38));
+        assert_eq!(0, super::add_digits(0));
+    }
+
+    #[test]
+    fn is_ugly() {
+        assert_eq!(false, super::is_ugly(14));
+        assert_eq!(false, super::is_ugly(11));
+        assert_eq!(false, super::is_ugly(-11));
+        assert_eq!(true, super::is_ugly(6));
+    }
+
+    #[test]
+    fn missing_number() {
+        assert_eq!(2, super::missing_number(vec![3, 0, 1]));
+        assert_eq!(8, super::missing_number(vec![9, 6, 4, 2, 3, 5, 7, 0, 1]));
+    }
+
+    #[test]
+    fn power_of_three() {
+        assert_eq!(false, super::is_power_of_three(-1));
+        assert_eq!(true, super::is_power_of_three(1));
+        assert_eq!(true, super::is_power_of_three(3));
+        assert_eq!(true, super::is_power_of_three(27));
+    }
+
+    #[test]
+    fn power_of_four() {
+        assert_eq!(false, super::is_power_of_four(-1));
+        assert_eq!(true, super::is_power_of_four(1));
+        assert_eq!(true, super::is_power_of_four(4));
+        assert_eq!(true, super::is_power_of_four(64));
+    }
+
+    #[test]
+    fn perfect_square_number() {
+        assert_eq!(true, is_perfect_square(4));
+        assert_eq!(true, is_perfect_square(16));
+        assert_eq!(false, is_perfect_square(8));
+    }
+
+    #[test]
+    fn to_hex() {
+        assert_eq!("13".to_string(), super::to_hex(19));
+        assert_eq!("ffffffff".to_string(), super::to_hex(-1));
+    }
+
+    #[test]
+    fn fizz_buzz() {
+        assert_eq!(vec!["1".to_string()], super::fizz_buzz(1));
+    }
+
+    #[test]
+    fn add_strings() {
+        assert_eq!(
+            "135".to_string(),
+            super::add_strings("12".to_string(), "123".to_string())
+        );
+        assert_eq!(
+            "134".to_string(),
+            super::add_strings("11".to_string(), "123".to_string())
+        );
+        assert_eq!(
+            "533".to_string(),
+            super::add_strings("456".to_string(), "77".to_string())
+        );
+        assert_eq!(
+            "10".to_string(),
+            super::add_strings("1".to_string(), "9".to_string())
+        );
+        assert_eq!(
+            "413".to_string(),
+            super::add_strings("408".to_string(), "5".to_string())
+        );
+    }
+
+    #[test]
+    fn arrange_coins() {
+        assert_eq!(1, super::arrange_coins(1));
+        assert_eq!(2, super::arrange_coins(5));
+        assert_eq!(3, super::arrange_coins(8));
+        assert_eq!(2, super::arrange_coins(3));
+    }
+
+    #[test]
+    fn construct_rectangle() {
+        assert_eq!(vec![2, 2], super::construct_rectangle(4));
+        assert_eq!(vec![37, 1], super::construct_rectangle(37));
+        assert_eq!(vec![427, 286], super::construct_rectangle(122122));
+    }
+
+    #[test]
+    fn convert_to_base7() {
+        assert_eq!("10".to_string(), super::convert_to_base7(7));
+        assert_eq!("202".to_string(), super::convert_to_base7(100));
+        assert_eq!("-10".to_string(), super::convert_to_base7(-7));
+    }
+
+    #[test]
+    fn check_perfect_number() {
+        assert_eq!(false, super::check_perfect_number(7));
+        assert_eq!(true, super::check_perfect_number(28));
+    }
+
+    #[test]
+    fn fib() {
+        assert_eq!(1, super::fib(1));
+        assert_eq!(1, super::fib(2));
+        assert_eq!(2, super::fib(3));
+        assert_eq!(3, super::fib(4));
+        assert_eq!(5, super::fib(5));
+    }
+
+    #[test]
+    fn maximum_product() {
+        assert_eq!(6, super::maximum_product(vec![1, 2, 3]));
+        assert_eq!(24, super::maximum_product(vec![1, 2, 3, 4]));
+        assert_eq!(-6, super::maximum_product(vec![-1, -2, -3]));
+    }
+
+    #[test]
+    fn self_dividing_numbers() {
+        assert_eq!(
+            vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 15, 22],
+            super::self_dividing_numbers(1, 22)
+        );
+        assert_eq!(vec![48, 55, 66, 77], super::self_dividing_numbers(47, 85));
     }
 }
