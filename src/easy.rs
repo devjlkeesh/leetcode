@@ -723,6 +723,21 @@ pub fn self_dividing_numbers(left: i32, right: i32) -> Vec<i32> {
     result
 }
 
+pub fn count_prime_set_bits(mut left: i32, right: i32) -> i32 {
+    let primes = [
+        0, -1, 2, 3, -4, 5, -6, 7, -8, -9, -10, 11, -12, 13, -14, -15, -16, 17, -18, 19,
+    ];
+    let mut count = 0;
+    while left <= right {
+        let ones = left.count_ones();
+        if primes[ones as usize] > 0 {
+            count += 1;
+        }
+        left += 1;
+    }
+    count
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1116,4 +1131,12 @@ mod tests {
         );
         assert_eq!(vec![48, 55, 66, 77], super::self_dividing_numbers(47, 85));
     }
+
+
+    #[test]
+    fn count_prime_set_bits(){
+        assert_eq!(5,super::count_prime_set_bits(10,15));
+        assert_eq!(4,super::count_prime_set_bits(6,10));
+    }
+
 }
