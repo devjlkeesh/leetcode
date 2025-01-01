@@ -738,6 +738,54 @@ pub fn count_prime_set_bits(mut left: i32, right: i32) -> i32 {
     count
 }
 
+// https://leetcode.com/problems/range-addition-ii/description/
+pub fn max_count(m: i32, n: i32, ops: Vec<Vec<i32>>) -> i32 {
+    if ops.is_empty() {
+        return n * m;
+    }
+    let mut mr = ops[0][0];
+    let mut mc = ops[0][1];
+    for op in &ops {
+        if op[0] < mr {
+            mr = op[0];
+        }
+        if op[1] < mc {
+            mc = op[1];
+        }
+    }
+    mr * mc
+}
+
+// https://leetcode.com/problems/largest-triangle-area/
+pub fn largest_triangle_area(points: Vec<Vec<i32>>) -> f64 {
+    fn calculate_area(point1: &[i32], point2: &[i32], point3: &[i32]) -> f64 {
+        f64::abs(
+            0.5f64
+                * ((point1[0] * (point2[1] - point3[1])
+                    + point2[0] * (point3[1] - point1[1])
+                    + point3[0] * (point1[1] - point2[1])) as f64),
+        )
+    }
+    if points.len() == 3 {
+        return calculate_area(&points[0], &points[1], &points[2]);
+    }
+
+    let mut area = 0.0;
+    for i in 0..points.len() {
+        for j in (i + 1)..points.len() {
+            for k in (j + 1)..points.len() {
+                area = f64::max(area, calculate_area(&points[i], &points[k], &points[j]));
+            }
+        }
+    }
+    area
+}
+
+// https://leetcode.com/problems/rectangle-overlap/
+pub fn is_rectangle_overlap(rec1: Vec<i32>, rec2: Vec<i32>) -> bool {
+    !(rec1[2] <= rec2[0] || rec1[0] >= rec2[2] || rec1[3] <= rec2[1] || rec1[1] >= rec2[3])
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1132,11 +1180,36 @@ mod tests {
         assert_eq!(vec![48, 55, 66, 77], super::self_dividing_numbers(47, 85));
     }
 
-
     #[test]
-    fn count_prime_set_bits(){
-        assert_eq!(5,super::count_prime_set_bits(10,15));
-        assert_eq!(4,super::count_prime_set_bits(6,10));
+    fn count_prime_set_bits() {
+        assert_eq!(5, super::count_prime_set_bits(10, 15));
+        assert_eq!(4, super::count_prime_set_bits(6, 10));
     }
 
+    #[test]
+    fn max_count() {
+        assert_eq!(4, super::max_count(3, 3, vec![vec![2, 2,], vec![3, 3]]))
+    }
+
+    #[test]
+    fn largest_triangle_area() {
+        assert_eq!(
+            2.0,
+            super::largest_triangle_area(vec![
+                vec![0, 0],
+                vec![0, 1],
+                vec![1, 0],
+                vec![0, 2],
+                vec![2, 0]
+            ])
+        )
+    }
+
+    #[test]
+    fn is_rectangle_overlap() {
+        assert_eq!(
+            true,
+            super::is_rectangle_overlap(vec![0, 0, 2, 2], vec![1, 1, 3, 3])
+        );
+    }
 }
