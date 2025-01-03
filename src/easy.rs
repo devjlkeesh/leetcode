@@ -786,6 +786,135 @@ pub fn is_rectangle_overlap(rec1: Vec<i32>, rec2: Vec<i32>) -> bool {
     !(rec1[2] <= rec2[0] || rec1[0] >= rec2[2] || rec1[3] <= rec2[1] || rec1[1] >= rec2[3])
 }
 
+pub fn smallest_range_i(nums: Vec<i32>, k: i32) -> i32 {
+    let mut min = i32::MAX;
+    let mut max = i32::MIN;
+    for x in nums {
+        min = i32::min(min, x);
+        max = i32::max(max, x);
+    }
+    i32::max(0, (max - k) - (min + k))
+}
+
+pub fn has_groups_size_x(deck: Vec<i32>) -> bool {
+    if deck.len() <= 1 {
+        return false;
+    }
+    let mut map = HashMap::new();
+    for x in deck {
+        map.entry(x).and_modify(|v| *v += 1).or_insert(1);
+    }
+    let mut gcd = 0;
+    fn get_gcd(mut a: i32, mut b: i32) -> i32 {
+        while b != 0 {
+            let temp = b;
+            b = a % b;
+            a = temp;
+        }
+        a
+    }
+    for (_, value) in map {
+        gcd = get_gcd(gcd, value);
+        if gcd == 1 {
+            return false;
+        }
+    }
+    gcd >= 2
+}
+
+pub fn max_sub_array_sum(nums: Vec<i32>) -> i32 {
+    let mut max = 0;
+    for i in 0..nums.len() {
+        let mut sum = 0;
+        for j in i..nums.len() {
+            sum += nums[j];
+            max = i32::max(max, sum)
+        }
+    }
+    max
+}
+
+pub fn largest_perimeter(nums: Vec<i32>) -> i32 {
+    let mut nums = nums;
+    nums.sort();
+    for i in (2..nums.len()).rev() {
+        if nums[i - 2] + nums[i - 1] > nums[i] {
+            return nums[i - 2] + nums[i - 1] + nums[i];
+        }
+    }
+    0
+}
+
+
+pub fn add_to_array_form(mut num: Vec<i32>, mut k: i32) -> Vec<i32> {
+    let mut carrier = 0;
+    let mut i = num.len() as i32 - 1;
+    let mut result = vec![];
+    while i >= 0 || k > 0 || carrier > 0 {
+        let mut sum = carrier;
+        if i >= 0 {
+            sum += num[i as usize];
+            i -= 1;
+        }
+        if k > 0 {
+            sum += k % 10;
+            k /= 10;
+        }
+        result.push(sum % 10);
+        carrier = sum / 10;
+    }
+    result.reverse();
+    result
+}
+
+fn duplicate_zeros(arr: &mut Vec<i32>) {
+    let mut zeros = 0;
+    let arr_len = arr.len();
+    for i in 0..arr_len {
+        if arr[i] == 0 {
+            zeros += 1;
+        }
+    }
+
+    let mut nrr = vec![0; zeros + arr_len];
+    let (mut i, mut j) = (0, 0);
+    while i < arr.len() {
+        if arr[i] != 0 {
+            nrr[j] = arr[i];
+        } else {
+            j += 1;
+        }
+        j += 1;
+        i += 1;
+    }
+    for i in 0..arr_len {
+        arr[i] = nrr[i];
+    }
+}
+
+pub fn height_checker(heights: Vec<i32>) -> i32 {
+    let mut expected = heights.clone();
+    expected.sort();
+    let mut k = 0;;
+    for i in 0..heights.len() {
+        if expected[i] != heights[i] {
+            k += 1;
+        }
+    }
+    k
+}
+
+pub fn check_if_exist(arr: Vec<i32>) -> bool {
+    let mut v: Vec<i32> = vec![];
+    for num in arr {
+        if v.contains(&(num * 2)) || (num % 2 == 0 && v.contains(&(num / 2))) {
+            return true;
+        }
+        v.push(num);
+    }
+    false
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -855,7 +984,6 @@ mod tests {
         let list2 = create_list(vec![2, 4, 6]);
         let result = super::merge_two_lists(list1, list2);
         let expected = create_list(vec![1, 2, 3, 4, 5, 6]);
-
         assert_eq!(result, expected);
     }
 
@@ -1211,5 +1339,44 @@ mod tests {
             true,
             super::is_rectangle_overlap(vec![0, 0, 2, 2], vec![1, 1, 3, 3])
         );
+    }
+    #[test]
+    fn smallest_range_i() {
+        assert_eq!(0, super::smallest_range_i(vec![1], 0));
+        assert_eq!(6, super::smallest_range_i(vec![0, 10], 2));
+    }
+
+    #[test]
+    fn has_groups_size_x() {
+        assert_eq!(false, super::has_groups_size_x(vec![1]));
+        assert_eq!(true, super::has_groups_size_x(vec![1, 1, 2, 2, 3, 3]));
+    }
+
+    #[test]
+    fn max_sub_array_sum() {
+        assert_eq!(22, super::max_sub_array_sum(vec![1, 3, -12, 4, 5, 13]));
+    }
+
+    #[test]
+    fn largest_perimeter() {
+        assert_eq!(5, super::largest_perimeter(vec![2, 2, 1]));
+        assert_eq!(0, super::largest_perimeter(vec![2, 1, 1]));
+    }
+
+    #[test]
+    fn duplicate_zeros() {
+        let mut l = vec![1, 0, 2, 3, 0, 4, 5, 0];
+        super::duplicate_zeros(&mut l);
+        assert_eq!(vec![1, 0, 0, 2, 3, 0, 0, 4], l);
+    }
+
+    #[test]
+    fn check_if_exists() {
+        assert_eq!(true, super::check_if_exist(vec![10, 2, 5, 3]))
+    }
+
+    #[test]
+    fn add_to_array_form() {
+        assert_eq!(super::add_to_array_form(vec![0], 24), vec![2, 4])
     }
 }
