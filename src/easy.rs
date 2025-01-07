@@ -845,7 +845,6 @@ pub fn largest_perimeter(nums: Vec<i32>) -> i32 {
     0
 }
 
-
 pub fn add_to_array_form(mut num: Vec<i32>, mut k: i32) -> Vec<i32> {
     let mut carrier = 0;
     let mut i = num.len() as i32 - 1;
@@ -895,7 +894,7 @@ fn duplicate_zeros(arr: &mut Vec<i32>) {
 pub fn height_checker(heights: Vec<i32>) -> i32 {
     let mut expected = heights.clone();
     expected.sort();
-    let mut k = 0;;
+    let mut k = 0;
     for i in 0..heights.len() {
         if expected[i] != heights[i] {
             k += 1;
@@ -913,6 +912,62 @@ pub fn check_if_exist(arr: Vec<i32>) -> bool {
         v.push(num);
     }
     false
+}
+
+pub fn all_cells_dist_order(rows: i32, cols: i32, r_center: i32, c_center: i32) -> Vec<Vec<i32>> {
+    let mut coords = vec![];
+    for i in 0..rows {
+        let r_distance = i32::abs(i - r_center);
+        for j in 0..cols {
+            coords.push(vec![r_distance + i32::abs(j - c_center), i, j]);
+        }
+    }
+    coords.sort_by(|a, b| a[0].partial_cmp(&b[0]).unwrap());
+    let mut result: Vec<Vec<i32>> = vec![];
+    for x in coords {
+        result.push(vec![x[1], x[2]]);
+    }
+    result
+}
+
+pub fn sort_colors(nums: &mut Vec<i32>) {
+    let mut r = 0;
+    let mut b = 0;
+    let mut g = 0;
+    for i in 0..nums.len() {
+        if nums[i] == 0 {
+            r += 1;
+        } else if nums[i] == 1 {
+            b += 1;
+        } else {
+            g += 1;
+        }
+    }
+    for i in 0..nums.len() {
+        if r > 0 {
+            nums[i] = 0;
+            r -= 1;
+        } else if b > 0 {
+            nums[i] = 1;
+            b -= 1;
+        } else if g > 0 {
+            nums[i] = 2;
+            g -= 1;
+        }
+    }
+}
+
+pub fn distribute_candies(candies: i32, num_people: i32) -> Vec<i32> {
+    let mut result = vec![0; num_people as usize];
+    let mut i: i32 = 0;
+    let mut candies = candies;
+
+    while candies > 0 {
+        result[(i % num_people) as usize] += i32::min(i + 1, candies);
+        candies -= i + 1;
+        i += 1;
+    }
+    result
 }
 
 #[cfg(test)]
@@ -1378,5 +1433,17 @@ mod tests {
     #[test]
     fn add_to_array_form() {
         assert_eq!(super::add_to_array_form(vec![0], 24), vec![2, 4])
+    }
+
+    #[test]
+    fn sort_colors() {
+        let mut input = vec![0, 1, 2, 0, 2, 1];
+        super::sort_colors(&mut input);
+        assert_eq!(vec![0, 0, 1, 1, 2, 2], input);
+    }
+
+    #[test]
+    fn distribute_candies() {
+        assert_eq!(vec![5, 2, 3], super::distribute_candies(10, 3));
     }
 }
