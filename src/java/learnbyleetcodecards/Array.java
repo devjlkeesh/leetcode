@@ -208,8 +208,28 @@ public class Array {
     }
 
     public List<Integer> findDisappearedNumbers(int[] nums) {
+        /*int[] m = new int[nums.length+1];
+        for (int num : nums) {
+            m[num]++;
+        }
         List<Integer> result = new ArrayList<>();
-
+        for (int i = 0; i < m.length; i++) {
+            if (m[i] == 0) {
+                result.add(i);
+            }
+        }*/
+        for (int num : nums) {
+            int index = Math.abs(num) - 1;
+            if (nums[index] > 0) {
+                nums[index] = -nums[index];
+            }
+        }
+        List<Integer> result = new ArrayList<>();
+        for (int num : nums) {
+            if (num > 0){
+                result.add(num);
+            }
+        }
         return result;
     }
 
