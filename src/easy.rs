@@ -1,4 +1,5 @@
 use std::collections::{HashMap, HashSet};
+use std::ops::Add;
 use std::vec;
 
 pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
@@ -970,9 +971,411 @@ pub fn distribute_candies(candies: i32, num_people: i32) -> Vec<i32> {
     result
 }
 
+pub fn string_matching(words: Vec<String>) -> Vec<String> {
+    let mut words = words;
+    let mut result = vec![];
+    words.sort_by(|s1, s2| s1.len().cmp(&s2.len()));
+    for i in 0..words.len() {
+        for j in (i + 1)..words.len() {
+            if words[j].contains(&words[i]) {
+                result.push(words[i].clone());
+                break;
+            }
+        }
+    }
+    result
+}
+
+pub fn count_prefix_suffix_pairs(words: Vec<String>) -> i32 {
+    if words.len() == 1 {
+        return 0;
+    }
+    let mut counter = 0;
+    for i in 0..(words.len() - 1) {
+        for j in (i + 1)..words.len() {
+            if words[j].starts_with(&words[i]) && words[j].ends_with(&words[i]) {
+                counter += 1;
+            }
+        }
+    }
+
+    counter
+}
+
+pub fn day_of_year(date: String) -> i32 {
+    let year = date[0..4].parse::<i32>().unwrap();
+    let month = date[5..7].parse::<i32>().unwrap();
+    let mut day = date[8..10].parse::<i32>().unwrap();
+    let days = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365];
+    if month > 2 && year % 4 == 0 && (year % 100 != 0 || year % 400 == 0) {
+        day += 1;
+    }
+    days[month as usize - 1] + day
+}
+
+pub fn min_increment_for_unique(nums: Vec<i32>) -> i32 {
+    if nums.len() <= 1 {
+        return 0;
+    }
+    let mut nums = nums;
+    nums.sort();
+    println!("nums: {:?}", nums);
+    let mut inc = 0;
+    let mut prev = nums[0];
+    for i in 1..(nums.len()) {
+        println!("nums: {:?}", nums[i]);
+        if nums[i] == prev {
+            inc += prev + 1 - nums[i];
+            prev = prev + 1;
+        } else {
+            prev = nums[i];
+        }
+    }
+    inc
+}
+
+pub fn is_palindrome(s: String) -> bool {
+    let mut i = 0;
+    let mut j = s.len() - 1;
+    let chrs = s.chars().collect::<Vec<char>>();
+    while i < j {
+        let mut lc = chrs[i];
+        if !((lc >= 'A' && lc <= 'Z') || (lc >= 'a' && lc <= 'z') || (lc >= '0' && lc <= '9')) {
+            i += 1;
+            continue;
+        }
+        let mut rc = chrs[j];
+        if (!((rc >= 'A' && rc <= 'Z') || (rc >= 'a' && rc <= 'z') || (rc >= '0' && rc <= '9'))) {
+            j -= 1;
+            continue;
+        }
+        if (lc >= 'a') {
+            lc = (lc as u8 - 32) as char;
+        }
+        if (rc >= 'a') {
+            rc = (rc as u8 - 32) as char;
+        }
+        if (lc != rc) {
+            return false;
+        }
+        i += 1;
+        j -= 1;
+    }
+    true
+}
+
+pub fn reverse_string(s: &mut Vec<char>) {
+    let mut i = 0;
+    let mut j = s.len() - 1;
+    while i < j {
+        s.swap(i, j);
+        i += 1;
+        j -= 1;
+    }
+}
+
+pub fn can_construct(ransom_note: String, magazine: String) -> bool {
+    if ransom_note.len() > magazine.len() {
+        return false;
+    }
+    let mut map = HashMap::new();
+    let iter = magazine.chars();
+    for letter in iter {
+        let value = map.get(&letter).or(Some(&0)).unwrap();
+        map.insert(letter, *value + 1);
+    }
+    let iter = ransom_note.chars();
+    for letter in iter {
+        let value = map.get(&letter).or(Some(&0)).unwrap();
+        if *value == 0 {
+            return false;
+        }
+        map.insert(letter, *value - 1);
+    }
+    true
+}
+
+pub fn count_segments(s: String) -> i32 {
+    if s.is_empty() {
+        return 0;
+    }
+    let mut p = ' ';
+    let mut r = 0;
+    let chars = s.chars();
+    for ch in chars {
+        if ch == ' ' && p == ' ' {
+            r += 1;
+        }
+        p = ch;
+    }
+
+    if s.chars().nth(s.len() - 1).unwrap() == ' ' {
+        r
+    } else {
+        r + 1
+    }
+}
+
+pub fn contains_duplicate(nums: Vec<i32>) -> bool {
+    let mut set = HashSet::new();
+    for num in nums {
+        if set.contains(&num) {
+            return true;
+        }
+        set.insert(num);
+    }
+    false
+}
+
+pub fn contains_nearby_duplicate(nums: Vec<i32>, k: i32) -> bool {
+    let mut map = HashMap::new();
+    let k = k as usize;
+    for i in 1..nums.len() {
+        let e = map.get(&nums[i]);
+        if e.is_some() && i - e.unwrap() <= k {
+            return true;
+        }
+        map.insert(nums[i], i);
+    }
+    false
+}
+
+pub fn check_straight_line(coordinates: Vec<Vec<i32>>) -> bool {
+    if (coordinates.len() == 2) {
+        return true;
+    }
+    let x1 = coordinates[0][0];
+    let y1 = coordinates[0][1];
+    let x2 = coordinates[1][0];
+    let y2 = coordinates[1][1];
+    for i in 2..coordinates.len() {
+        let x3 = coordinates[i][0];
+        let y3 = coordinates[i][1];
+        let area = 0.5f64 * f64::abs((x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) as f64);
+        if (area > 0.0) {
+            return false;
+        }
+    }
+    true
+}
+
+pub fn odd_cells(m: i32, n: i32, indices: Vec<Vec<i32>>) -> i32 {
+    let mut rows = vec![0; m as usize];
+    let mut cols = vec![0; n as usize];
+
+    for pair in indices {
+        rows[pair[0] as usize] += 1;
+        cols[pair[1] as usize] += 1;
+    }
+
+    let mut sum = 0;
+    for i in 0..m as usize {
+        for j in 0..n as usize {
+            if (rows[i] + cols[j]) % 2 != 0 {
+                sum += 1;
+            }
+        }
+    }
+    sum
+}
+
+pub fn can_alice_win(mut n: i32) -> bool {
+    if n < 10 {
+        return false;
+    }
+    let mut prev = 10;
+    let mut i = 0;
+    let mut alice_win = true;
+    while n >= prev {
+        n -= prev;
+        prev -= 1;
+        if i % 2 == 0 {
+            alice_win = true;
+        } else {
+            alice_win = false;
+        }
+        i += 1;
+    }
+
+    alice_win
+}
+
+pub fn smallest_number(mut n: i32, t: i32) -> i32 {
+    while n < i32::MAX {
+        let mut a = n;
+        let mut p = 1;
+        while a > 0 {
+            let d = a % 10;
+            if d == 0 {
+                p = 0;
+                break;
+            }
+            p *= d;
+            a /= 10;
+        }
+        if p % t == 0 {
+            return n;
+        }
+        n += 1;
+    }
+    n
+}
+
+pub fn kth_character(k: i32) -> char {
+    let mut chars = vec!['A'];
+    while chars.len() < k as usize {
+        let len = chars.len();
+        for i in 0..len {
+            chars.push(((chars[i] as u8 - 96) % 26 + 97) as char);
+        }
+    }
+    chars[k as usize - 1]
+}
+
+pub fn get_sneaky_numbers(nums: Vec<i32>) -> Vec<i32> {
+    let mut set = HashSet::new();
+    let mut result = Vec::new();
+    let mut i = 0;
+    for num in nums {
+        if set.contains(&num) {
+            result.push(num);
+            i += 1;
+            if i == 2 {
+                break;
+            }
+        } else {
+            set.insert(num);
+        }
+    }
+    result
+}
+
+pub fn convert_date_to_binary(date: String) -> String {
+    let year = &date[0..4];
+    let month = &date[5..7];
+    let day = &date[8..10];
+
+    let year_binary = format!("{:b}", year.parse::<u32>().unwrap());
+    let month_binary = format!("{:b}", month.parse::<u32>().unwrap());
+    let day_binary = format!("{:b}", day.parse::<u32>().unwrap());
+
+    format!("{}-{}-{}", year_binary, month_binary, day_binary)
+}
+
+pub fn num_prime_arrangements(n: i32) -> i32 {
+    let m = 1000007;
+    let count_primes = |n: i32| -> i32 {
+        let n = n as usize;
+        let mut primes = vec![true; n + 1];
+        primes[0] = false;
+        primes[1] = false;
+        for i in 2..=n {
+            for j in ((i * i)..=n).step_by(i) {
+                primes[j] = false;
+            }
+        }
+        let mut count = 0;
+        for i in 1..=n {
+            if primes[i] {
+                count += 1;
+            }
+        }
+        count
+    };
+
+    let fac = |n: i32| -> i64 {
+        let mut r = 1;
+        for i in 2..=n {
+            r = (r * i as i64) % m;
+        }
+        r
+    };
+
+    let pc = count_primes(n);
+    let cc = n - pc;
+    (fac(pc) * fac(cc) % m) as i32
+}
+
+pub fn day_of_the_week(day: i32, month: i32, year: i32) -> String {
+    let mut days = (year - 1971) * 365;
+    for i in 1971..year {
+        if i % 4 == 0 && (i % 100 != 0 || i % 400 == 0) {
+            days += 1;
+        }
+    }
+
+    let month_days = vec![0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365];
+    let mut day_of_year = month_days[month as usize - 1] + day;
+    if (month >= 3 && (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0))) {
+        day_of_year += 1;
+    }
+    days += day_of_year;
+    let day_of_week = vec![
+        "Friday",
+        "Saturday",
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+    ];
+    day_of_week[(days as usize - 1) % 7].to_string()
+}
+
+pub fn prefix_count(words: Vec<String>, pref: String) -> i32 {
+    if pref.is_empty() {
+        return words.len() as i32;
+    }
+    let mut count = 0;
+    for w in words {
+        if w.starts_with(&pref) {
+            count += 1;
+        }
+    }
+    count
+}
+
+pub fn gcd_of_strings(str1: String, str2: String) -> String {
+    if str1.clone() + &str2 != str2.clone() + &str1 {
+        return String::new();
+    }
+    let mut a = str1.len();
+    let mut b = str2.len();
+    while b != 0 {
+        let temp = a;
+        a = b;
+        b = temp % b;
+    }
+    str1[..a].to_string()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+
+    #[test]
+    fn gcd_of_strings(){
+        assert_eq!(super::gcd_of_strings("ABABAB".to_string(),"ABAB".to_string()),"AB".to_string())
+    }
+
+    #[test]
+    fn day_of_the_week() {
+        assert_eq!("Saturday", super::day_of_the_week(31, 8, 2019));
+    }
+
+    #[test]
+    fn reverse_string() {
+        let mut v = vec!['a', 'b', 'c', 'd'];
+        let expected = vec!['d', 'c', 'b', 'a'];
+        super::reverse_string(&mut v);
+        assert_eq!(expected, v);
+    }
+
+    #[test]
+    fn is_palindrome() {
+        assert_eq!(true, super::is_palindrome("aba".to_string()));
+    }
     #[test]
     fn two_sum() {
         assert_eq!(super::two_sum(vec![2, 7, 11, 15], 9), vec![0, 1]);
@@ -1445,5 +1848,23 @@ mod tests {
     #[test]
     fn distribute_candies() {
         assert_eq!(vec![5, 2, 3], super::distribute_candies(10, 3));
+    }
+
+    #[test]
+    fn string_matching() {
+        assert_eq!(
+            vec![String::from("as"), String::from("hero")],
+            super::string_matching(vec![
+                "mass".to_string(),
+                "as".to_string(),
+                "hero".to_string(),
+                "superhero".to_string()
+            ])
+        )
+    }
+
+    #[test]
+    fn min_inc() {
+        //assert_eq!(6, min_increment_for_unique(vec![3, 2, 1, 2, 1, 7]))
     }
 }
