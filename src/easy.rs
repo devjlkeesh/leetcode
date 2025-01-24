@@ -1349,14 +1349,186 @@ pub fn gcd_of_strings(str1: String, str2: String) -> String {
     str1[..a].to_string()
 }
 
+pub fn intersection(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
+    if nums1.len() == 0 || nums2.len() == 0 {
+        return vec![];
+    }
+
+    let mut m = vec![0; 1001];
+    for n in nums1 {
+        m[n as usize] = 1;
+    }
+    let mut count = 0;
+    for n in nums2 {
+        if m[n as usize] == 1 {
+            m[n as usize] = 2;
+            count += 1;
+        }
+    }
+    let mut result = vec![0i32; count];
+    let mut j = 0;
+    for i in 0..m.len() {
+        if m[i] == 2 {
+            result[j] = i as i32;
+            j += 1;
+        }
+    }
+    result
+}
+
+pub fn sum_of_encrypted_int(nums: Vec<i32>) -> i32 {
+    let mut s = 0;
+    for mut num in nums {
+        let mut max_digit = 0;
+        let mut digit_count = 0;
+        while num > 0 {
+            max_digit = i32::max(max_digit, num % 10);
+            num /= 10;
+            digit_count += 1;
+        }
+        let mut i = 1;
+        while digit_count > 0 {
+            s += max_digit * i;
+            digit_count -= 1;
+            i *= 10;
+        }
+    }
+    s
+}
+
+pub fn find_restaurant(list1: Vec<String>, list2: Vec<String>) -> Vec<String> {
+    let mut index_map = HashMap::new();
+
+    for (i, &ref item) in list1.iter().enumerate() {
+        index_map.insert(item, i);
+    }
+
+    let mut result = Vec::new();
+    let mut min_sum = usize::MAX;
+
+    for (j, &ref item) in list2.iter().enumerate() {
+        if let Some(&i) = index_map.get(&item) {
+            let sum = i + j;
+            if sum < min_sum {
+                result.clear();
+                result.push(item.to_string());
+                min_sum = sum;
+            } else if sum == min_sum {
+                result.push(item.to_string());
+            }
+        }
+    }
+
+    result
+}
+
+pub fn first_uniq_char(s: String) -> i32 {
+    let mut map = [0; 26];
+    s.chars().for_each(|c| {
+        map[c as usize - 'a' as usize] += 1;
+    });
+    for (i, c) in s.chars().enumerate() {
+        if map[c as usize - 'a' as usize] == 1 {
+            return i as i32;
+        }
+    }
+    -1
+}
+
+pub fn intersect(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
+    let mut m = [0; 1001];
+    for n in &nums1 {
+        m[*n as usize] += 1;
+    }
+
+    let mut i = 0;
+    let mut r = vec![0; nums1.len()];
+    for n in nums2 {
+        if m[n as usize] > 0 {
+            r[i] = n;
+            m[n as usize] -= 1;
+            i += 1;
+        }
+    }
+    r[..i].to_vec()
+}
+
+pub fn find_disappeared_numbers(nums: Vec<i32>) -> Vec<i32> {
+    let mut m = vec![0; nums.len() + 1];
+    for n in nums {
+        m[n as usize] += 1;
+    }
+    let mut r = vec![];
+    for i in 0..m.len() {
+        if m[i] == 0 {
+            r.push(i as i32);
+        }
+    }
+    r
+}
+
+pub fn group_anagrams(strs: Vec<String>) -> Vec<Vec<String>> {
+    let mut map: HashMap<String, Vec<String>> = HashMap::new();
+    for s in strs {
+        let mut chars: Vec<char> = s.chars().collect();
+        chars.sort_unstable();
+        let key: String = chars.into_iter().collect();
+
+        map.entry(key).or_insert_with(Vec::new).push(s);
+    }
+
+    map.into_values().collect()
+}
+
+pub fn is_valid_sudoku(board: Vec<Vec<char>>) -> bool {
+    let mut row = vec![HashSet::new(); 9];
+    let mut col = vec![HashSet::new(); 9];
+    let mut grid = vec![HashSet::new(); 9];
+    for i in 0..9 {
+        for j in 0..9 {
+            let ch = board[i][j];
+            if ch == '.' {
+                continue;
+            }
+            let gi = (i * 3) / 3 + j / 3;
+            if row[i].contains(&ch) || col[j].contains(&ch) || grid[i].contains(&ch) {
+                return false;
+            }
+            row[i].insert(ch);
+            col[j].insert(ch);
+            grid[gi].insert(ch);
+        }
+    }
+    true
+}
+
+pub fn num_jewels_in_stones(jewels: String, stones: String) -> i32 {
+    let mut ch = [0; 128];
+    let mut n = 0;
+    stones.chars().for_each(|c| {
+        ch[c as usize] += 1;
+    });
+    jewels.chars().for_each(|c| {
+        n += ch[c as usize];
+    });
+    n
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    #[test]
+    fn first_uniq_char() {
+        assert_eq!(super::first_uniq_char("leetcode".to_string()), 0);
+    }
 
     #[test]
-    fn gcd_of_strings(){
-        assert_eq!(super::gcd_of_strings("ABABAB".to_string(),"ABAB".to_string()),"AB".to_string())
+    fn gcd_of_strings() {
+        assert_eq!(
+            super::gcd_of_strings("ABABAB".to_string(), "ABAB".to_string()),
+            "AB".to_string()
+        )
     }
 
     #[test]
