@@ -1,4 +1,5 @@
-use std::collections::{HashMap, HashSet};
+use std::cmp::Reverse;
+use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::ops::Add;
 use std::vec;
 
@@ -1512,6 +1513,217 @@ pub fn num_jewels_in_stones(jewels: String, stones: String) -> i32 {
         n += ch[c as usize];
     });
     n
+}
+
+pub fn four_sum_count(nums1: Vec<i32>, nums2: Vec<i32>, nums3: Vec<i32>, nums4: Vec<i32>) -> i32 {
+    let mut count = 0;
+    let mut map = HashMap::new();
+    for a in nums1 {
+        for b in &nums2 {
+            let ab = a + b;
+            map.insert(ab, map.get(&ab).unwrap_or(&0) + 1);
+        }
+    }
+    for c in nums3 {
+        for d in &nums4 {
+            let cd = -(c + d);
+            count += map.get(&cd).unwrap_or(&0);
+        }
+    }
+    count
+}
+
+pub fn check_two_chessboards(coordinate1: String, coordinate2: String) -> bool {
+    let mut p1 = vec![];
+    let mut p2 = vec![];
+    coordinate1.chars().for_each(|c| {
+        p1.push(c as i32);
+    });
+    coordinate2.chars().for_each(|c| {
+        p2.push(c as i32);
+    });
+    if (p1[0] + p1[1]) % 2 == 0 && (p2[0] + p2[1]) % 2 == 0 {
+        return true;
+    }
+    (p1[0] + p1[1]) % 2 != 0 && (p2[0] + p2[1]) % 2 != 0
+}
+
+pub fn top_k_frequent(nums: Vec<i32>, k: i32) -> Vec<i32> {
+    let mut map = HashMap::new();
+    let mut result = Vec::with_capacity(k as usize);
+
+    for &num in &nums {
+        *map.entry(num).or_insert(0) += 1;
+    }
+    let mut pq = BinaryHeap::new();
+    for (&key, &val) in &map {
+        pq.push(Reverse((val, key)));
+        if pq.len() > k as usize {
+            pq.pop();
+        }
+    }
+    while let Some(Reverse((_, key))) = pq.pop() {
+        result.push(key);
+    }
+    result.reverse();
+    result
+}
+
+pub fn get_final_state(nums: Vec<i32>, k: i32, multiplier: i32) -> Vec<i32> {
+    let mut nums = nums;
+    for i in 0..k {
+        let mut min = i32::MAX;
+        let mut min_index = 0;
+        for j in 0..nums.len() {
+            if nums[j] < min {
+                min = nums[j];
+                min_index = j;
+            }
+        }
+        nums[min_index] = min * multiplier;
+    }
+    nums
+}
+
+pub fn can_alice_win2(nums: Vec<i32>) -> bool {
+    let mut single_digit_sum = 0;
+    let mut double_digit_sum = 0;
+    for num in &nums {
+        if *num < 10 {
+            single_digit_sum += num;
+        } else {
+            double_digit_sum += num;
+        }
+    }
+    single_digit_sum != double_digit_sum
+}
+
+pub fn winning_player(x: i32, y: i32) -> String {
+    let mut x = x;
+    let mut y = y;
+    let mut alice_turn = false;
+    while x > 0 && y > 3 {
+        x -= 1;
+        y -= 4;
+        alice_turn = !alice_turn;
+    }
+    if alice_turn {
+        String::from("Alice")
+    } else {
+        String::from("Bob")
+    }
+}
+
+pub fn minimum_operations(nums: Vec<i32>) -> i32 {
+    let mut count = 0;
+    for num in nums {
+        if num % 3 != 0 {
+            count += 1;
+        }
+    }
+    count
+}
+pub fn number_of_child(n: i32, k: i32) -> i32 {
+    if k < n {
+        return k;
+    }
+    let mut left_to_right = true;
+    let mut k = k;
+    while k >= n {
+        left_to_right = !left_to_right;
+        k -= n - 1;
+    }
+    if left_to_right {
+        k
+    } else {
+        n - k - 1
+    }
+}
+
+pub fn triangle_type(nums: Vec<i32>) -> String {
+    let a = nums[0];
+    let b = nums[1];
+    let c = nums[2];
+    if a == b && b == c {
+        return String::from("equilateral");
+    }
+    if a + b < c || a + c < b || b + c < a {
+        return String::from("none");
+    }
+    if a == b || a == c || b == c {
+        return String::from("isosceles");
+    }
+    String::from("scalene")
+}
+
+pub fn find_missing_and_repeated_values(grid: Vec<Vec<i32>>) -> Vec<i32> {
+    let n = grid.len() as i32;
+    let need_sum = n * n * (1 + n * n) / 2;
+    let mut actual_sum = 0;
+    let mut map = vec![0; (n * n + 1) as usize];
+    let mut dublicate = 0;
+    for row in grid {
+        for cell in row {
+            if map[cell as usize] != 0 {
+                dublicate = cell;
+            } else {
+                map[cell as usize] += 1;
+            }
+            actual_sum += cell;
+        }
+    }
+    vec![dublicate, need_sum + dublicate - actual_sum]
+}
+
+pub fn are_similar(mat: Vec<Vec<i32>>, k: i32) -> bool {
+    let n = mat.len();
+    let m = mat[0].len();
+    let mut k = k as usize;
+    k %= m;
+    for i in 0..n {
+        for j in 0..m {
+            let new_index = if i % 2 == 0 {
+                (j + k) % m
+            } else {
+                (j - k + m) % m
+            };
+            if mat[i][new_index] != mat[i][j] {
+                return false;
+            }
+        }
+    }
+    true
+}
+
+pub fn maximum_odd_binary_number(s: String) -> String {
+    let mut ones_count = 0;
+    s.chars().for_each(|c| {
+        if c == '1' {
+            ones_count += 1;
+        }
+    });
+    let zeroes_count = s.len() - ones_count;
+    let mut result = String::with_capacity(s.len());
+
+    for i in 0..(ones_count - 1) {
+        result.push('1');
+    }
+    for i in 0..zeroes_count {
+        result.push('0');
+    }
+    result.push('1');
+    result
+}
+
+pub fn difference_of_sums(n: i32, m: i32) -> i32 {
+    let actual_sum = n*(1+n)/2;
+    let mut s = 0;
+    for i in 1..=n {
+        if i%m == 0 {
+            s+=i;
+        }
+    }
+    actual_sum - 2*s
 }
 
 #[cfg(test)]
