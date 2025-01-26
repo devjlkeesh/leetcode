@@ -2,10 +2,12 @@ package learnbyleetcodecards.hashtable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 public class MyHashSet {
 
@@ -290,6 +292,85 @@ public class MyHashSet {
         return n;
     }
 
+    public int fourSumCount(int[] nums1, int[] nums2, int[] nums3, int[] nums4) {
+        int count = 0;
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int a : nums1) {
+            for (int b : nums2) {
+                int sum = a + b;
+                map.put(sum, map.getOrDefault(sum, 0) + 1);
+            }
+        }
+        for (int c : nums3) {
+            for (int d : nums4) {
+                int n = -(c + d);
+                count += map.getOrDefault(n, 0);
+            }
+        }
+        return count;
+    }
+
+    public int[] topKFrequent(int[] nums, int k) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        for (int num : nums) {
+            map.put(num, map.getOrDefault(num, 0) + 1);
+        }
+        PriorityQueue<Map.Entry<Integer, Integer>> pq = new PriorityQueue<>(
+                Comparator.comparingInt(Map.Entry::getValue)
+        );
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            pq.add(entry);
+            if (pq.size() > k) {
+                pq.poll();
+            }
+        }
+        int[] result = new int[k];
+        for (int i = k - 1; i >= 0; i--) {
+            result[i] = pq.poll().getKey();
+        }
+        return result;
+    }
+
+    public int[] getFinalState(int[] nums, int k, int multiplier) {
+        PriorityQueue<Map.Entry<Integer, Integer>> pq = new PriorityQueue<>(
+                (a, b) -> {
+                    int valueComparison = Integer.compare(a.getValue(), b.getValue());
+                    if (valueComparison == 0) {
+                        return Integer.compare(a.getKey(), b.getKey());
+                    }
+                    return valueComparison;
+                }
+        );
+        for (int i = 0; i < nums.length; i++) {
+            pq.add(Map.entry(i, nums[i]));
+        }
+
+        for (int i = 0; i < k; i++) {
+            var entry = pq.poll();
+            pq.add(Map.entry(entry.getKey(), entry.getValue() * multiplier));
+        }
+        while (!pq.isEmpty()) {
+            var entry = pq.poll();
+            nums[entry.getKey()] = entry.getValue();
+        }
+        return nums;
+    }
+
+    public int[] getFinalState2(int[] nums, int k, int multiplier) {
+        for (int i = 0; i < k; i++) {
+            int min = Integer.MAX_VALUE;
+            int minIndex = 0;
+            for (int j = 0; j < nums.length; j++) {
+                if (nums[j] < min) {
+                    min = nums[j];
+                    minIndex = j;
+                }
+            }
+            nums[minIndex] = min * multiplier;
+        }
+        return nums;
+    }
+
     public static void main(String[] args) {
         MyHashSet hashSet = new MyHashSet();
         System.out.println(hashSet.singleNumber(new int[]{2, 2, 3}));
@@ -318,6 +399,29 @@ public class MyHashSet {
         System.out.println((int) 'z' - 65);
         System.out.println((int) 'A' - 65);
         System.out.println((int) 'Z');
+        PriorityQueue<Integer> pq = new PriorityQueue<>(Comparator.reverseOrder());
+        pq.offer(1);
+        pq.offer(2);
+        pq.offer(3);
+        pq.offer(4);
+        pq.offer(5);
+
+        System.out.println("sdfd");
+        int i = 4;
+        while (i > 0) {
+            System.out.println(pq.poll());
+            i--;
+        }
+        System.out.println(Arrays.toString(hashSet.getFinalState(new int[]{2, 1, 3, 5, 6}, 5, 2)));
+        System.out.println(Arrays.toString(hashSet.getFinalState2(new int[]{2, 1, 3, 5, 6}, 5, 2)));
+        //0 1 2 3 4
+
+        // Operation	Result
+        // After operation 1	[2, 2, 3, 5, 6]
+        // After operation 2	[4, 2, 3, 5, 6]
+        // After operation 3	[4, 4, 3, 5, 6]
+        // After operation 4	[4, 4, 6, 5, 6]
+        // After operation 5	[8, 4, 6, 5, 6]
     }
 
 }
