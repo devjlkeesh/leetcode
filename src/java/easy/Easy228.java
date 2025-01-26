@@ -5,24 +5,22 @@ import java.util.List;
 
 public class Easy228 {
     public List<String> summaryRanges(int[] nums) {
-        if (nums.length == 0) {
-            return new ArrayList<>();
-        }
-        String b;
-        String e;
-        long bb = Long.MIN_VALUE;
-        int ee;
-        int k = 0;
-        for (int i = 0; i < nums.length - 1; i++) {
-            if (nums[i] == k) {
-                if (bb != Long.MIN_VALUE){
-                    ee = nums[i];
-                }else{
-                    bb = nums[i];
-                    ee = nums[i];
+        List<String> result = new ArrayList<>();
+        if (nums.length == 0) return result;
+        int start = nums[0];
+        for (int i = 1; i <= nums.length; i++) {
+            if (i == nums.length || nums[i] != nums[i - 1] + 1) {
+                if (start == nums[i - 1]) {
+                    result.add(String.valueOf(start));
+                } else {
+                    result.add(start + "->" + nums[i - 1]);
+                }
+                if (i < nums.length) {
+                    start = nums[i];
                 }
             }
         }
-        return new ArrayList<>();
+
+        return result;
     }
 }
