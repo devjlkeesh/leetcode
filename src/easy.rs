@@ -1,6 +1,7 @@
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::ops::Add;
+use std::path::Component::ParentDir;
 use std::vec;
 
 pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
@@ -1716,14 +1717,158 @@ pub fn maximum_odd_binary_number(s: String) -> String {
 }
 
 pub fn difference_of_sums(n: i32, m: i32) -> i32 {
-    let actual_sum = n*(1+n)/2;
+    let actual_sum = n * (1 + n) / 2;
     let mut s = 0;
     for i in 1..=n {
-        if i%m == 0 {
-            s+=i;
+        if i % m == 0 {
+            s += i;
         }
     }
-    actual_sum - 2*s
+    actual_sum - 2 * s
+}
+
+pub fn count_symmetric_integers(low: i32, high: i32) -> i32 {
+    let mut count = 0;
+    for i in low..=high {
+        let digit_count = i32::ilog10(i);
+        if digit_count % 2 == 0 {
+            let divisor = i32::pow(10, digit_count / 2);
+            let mut first_half = i / divisor;
+            let mut second_half = i % divisor;
+
+            let mut first_half_digit_sum = 0;
+            let mut second_half_digit_sum = 0;
+
+            while first_half > 0 {
+                first_half_digit_sum += first_half % 10;
+                first_half /= 10;
+            }
+
+            while second_half > 0 {
+                second_half_digit_sum += second_half % 10;
+                second_half /= 10;
+            }
+            if (first_half_digit_sum == second_half_digit_sum) {
+                count += 1;
+            }
+        }
+    }
+    count
+}
+
+pub fn summary_ranges(nums: Vec<i32>) -> Vec<String> {
+    let mut result = vec![];
+    if nums.is_empty() {
+        return result;
+    }
+    let mut start = nums[0];
+    for i in 1..=nums.len() {
+        if i == nums.len() || nums[i - 1] + 1 != nums[i] {
+            if start == nums[i - 1] {
+                result.push(start.to_string());
+            } else {
+                result.push(format!("{}->{}", start, nums[i - 1]));
+            }
+            if i < nums.len() {
+                start = nums[i];
+            }
+        }
+    }
+    result
+}
+
+struct NumArray {
+    nums: Vec<i32>,
+}
+
+/**
+ * `&self` means the method takes an immutable reference.
+ * If you need a mutable reference, change it to `&mut self` instead.
+ */
+impl NumArray {
+    fn new(nums: Vec<i32>) -> Self {
+        let mut nums = nums;
+        for i in 1..nums.len() {
+            nums[i] = nums[i - 1] + nums[i];
+        }
+        Self { nums }
+    }
+
+    fn sum_range(&self, left: i32, right: i32) -> i32 {
+        if left == 0 {
+            return self.nums[right as usize];
+        }
+        self.nums[right as usize] - self.nums[left as usize - 1]
+    }
+}
+
+pub fn distribute_candies2(candy_type: Vec<i32>) -> i32 {
+    let mut ct = [false; 2 * 100_000 + 1];
+    let mut type_count = 0;
+    let n = candy_type.len();
+    for t in candy_type {
+        let t = (t + 100000) as usize;
+        if !ct[t] {
+            type_count += 1;
+            if type_count == n / 2 {
+                return type_count as i32;
+            }
+            ct[t] = true;
+        }
+    }
+    type_count as i32
+}
+
+pub fn hamming_distance(x: i32, y: i32) -> i32 {
+    (x ^ y).count_ones() as i32
+}
+
+pub fn valid_palindrome(s: String) -> bool {
+    fn valid_palindrom(s: &Vec<char>, mut i: usize, mut j: usize, a: bool) -> bool {
+        while i < j {
+            if s[i] != s[j] {
+                if a {
+                    return false;
+                }
+                return valid_palindrom(s, i + 1, j, true) || valid_palindrom(s, i, j - 1, true);
+            }
+            i += 1;
+            j -= 1;
+        }
+        true
+    }
+    let chars: Vec<char> = s.chars().collect();
+    valid_palindrom(&chars, 0, s.len(), false)
+}
+
+pub fn final_position_of_snake(n: i32, commands: Vec<String>) -> i32 {
+    let mut cr = 0;
+    let mut cc = 0;
+    for command in commands {
+        if command.eq("UP") {
+            cr -= 1;
+        } else if (command.eq("DOWN")) {
+            cr += 1;
+        } else if (command.eq("LEFT")) {
+            cc -= 1;
+        } else {
+            cc += 1;
+        }
+    }
+    (cr * n) + cc
+}
+
+pub fn is_balanced(num: String) -> bool {
+    let mut  even_sum = 0;
+    let mut  odd_sum = 0;
+    num.chars().enumerate().for_each(|(i, c)| {
+        if i % 2 == 0 {
+            even_sum += c as i32 - 48;
+        }else{
+            odd_sum += c as i32 - 48;
+        }
+    });
+    even_sum == odd_sum
 }
 
 #[cfg(test)]
