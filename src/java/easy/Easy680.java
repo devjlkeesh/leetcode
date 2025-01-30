@@ -20,4 +20,28 @@ public class Easy680 {
         return true;
     }
 
+
+    public boolean validPalindrome3(String s) {
+        int i = 0, j = s.length() - 1;
+        int t = 0;
+        while (i < j) {
+            if (s.charAt(i) != s.charAt(j)) {
+                if (!(s.charAt(i+1) == s.charAt(j) || s.charAt(j-1) == s.charAt(i))) {
+                    return false;
+                }i++;j--;
+            } else {
+                i++;
+                j--;
+            }
+
+        }
+        return true;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new Easy680().validPalindrome3("aba"));
+        System.out.println(new Easy680().validPalindrome3("abca"));
+        System.out.println(new Easy680().validPalindrome3("abc"));
+        System.out.println(new Easy680().validPalindrome3("cbbcc"));
+    }
 }
