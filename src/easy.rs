@@ -1,6 +1,7 @@
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::ops::Add;
+use std::path::Component::ParentDir;
 use std::vec;
 
 pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
@@ -1716,19 +1717,385 @@ pub fn maximum_odd_binary_number(s: String) -> String {
 }
 
 pub fn difference_of_sums(n: i32, m: i32) -> i32 {
-    let actual_sum = n*(1+n)/2;
+    let actual_sum = n * (1 + n) / 2;
     let mut s = 0;
     for i in 1..=n {
-        if i%m == 0 {
-            s+=i;
+        if i % m == 0 {
+            s += i;
         }
     }
-    actual_sum - 2*s
+    actual_sum - 2 * s
+}
+
+pub fn count_symmetric_integers(low: i32, high: i32) -> i32 {
+    let mut count = 0;
+    for i in low..=high {
+        let digit_count = i32::ilog10(i);
+        if digit_count % 2 == 0 {
+            let divisor = i32::pow(10, digit_count / 2);
+            let mut first_half = i / divisor;
+            let mut second_half = i % divisor;
+
+            let mut first_half_digit_sum = 0;
+            let mut second_half_digit_sum = 0;
+
+            while first_half > 0 {
+                first_half_digit_sum += first_half % 10;
+                first_half /= 10;
+            }
+
+            while second_half > 0 {
+                second_half_digit_sum += second_half % 10;
+                second_half /= 10;
+            }
+            if (first_half_digit_sum == second_half_digit_sum) {
+                count += 1;
+            }
+        }
+    }
+    count
+}
+
+pub fn summary_ranges(nums: Vec<i32>) -> Vec<String> {
+    let mut result = vec![];
+    if nums.is_empty() {
+        return result;
+    }
+    let mut start = nums[0];
+    for i in 1..=nums.len() {
+        if i == nums.len() || nums[i - 1] + 1 != nums[i] {
+            if start == nums[i - 1] {
+                result.push(start.to_string());
+            } else {
+                result.push(format!("{}->{}", start, nums[i - 1]));
+            }
+            if i < nums.len() {
+                start = nums[i];
+            }
+        }
+    }
+    result
+}
+
+struct NumArray {
+    nums: Vec<i32>,
+}
+
+/**
+ * `&self` means the method takes an immutable reference.
+ * If you need a mutable reference, change it to `&mut self` instead.
+ */
+impl NumArray {
+    fn new(nums: Vec<i32>) -> Self {
+        let mut nums = nums;
+        for i in 1..nums.len() {
+            nums[i] = nums[i - 1] + nums[i];
+        }
+        Self { nums }
+    }
+
+    fn sum_range(&self, left: i32, right: i32) -> i32 {
+        if left == 0 {
+            return self.nums[right as usize];
+        }
+        self.nums[right as usize] - self.nums[left as usize - 1]
+    }
+}
+
+pub fn distribute_candies2(candy_type: Vec<i32>) -> i32 {
+    let mut ct = [false; 2 * 100_000 + 1];
+    let mut type_count = 0;
+    let n = candy_type.len();
+    for t in candy_type {
+        let t = (t + 100000) as usize;
+        if !ct[t] {
+            type_count += 1;
+            if type_count == n / 2 {
+                return type_count as i32;
+            }
+            ct[t] = true;
+        }
+    }
+    type_count as i32
+}
+
+pub fn hamming_distance(x: i32, y: i32) -> i32 {
+    (x ^ y).count_ones() as i32
+}
+
+pub fn valid_palindrome(s: String) -> bool {
+    fn valid_palindrom(s: &Vec<char>, mut i: usize, mut j: usize, a: bool) -> bool {
+        while i < j {
+            if s[i] != s[j] {
+                if a {
+                    return false;
+                }
+                return valid_palindrom(s, i + 1, j, true) || valid_palindrom(s, i, j - 1, true);
+            }
+            i += 1;
+            j -= 1;
+        }
+        true
+    }
+    let chars: Vec<char> = s.chars().collect();
+    valid_palindrom(&chars, 0, s.len(), false)
+}
+
+pub fn final_position_of_snake(n: i32, commands: Vec<String>) -> i32 {
+    let mut cr = 0;
+    let mut cc = 0;
+    for command in commands {
+        if command.eq("UP") {
+            cr -= 1;
+        } else if (command.eq("DOWN")) {
+            cr += 1;
+        } else if (command.eq("LEFT")) {
+            cc -= 1;
+        } else {
+            cc += 1;
+        }
+    }
+    (cr * n) + cc
+}
+
+pub fn is_balanced(num: String) -> bool {
+    let mut even_sum = 0;
+    let mut odd_sum = 0;
+    num.chars().enumerate().for_each(|(i, c)| {
+        if i % 2 == 0 {
+            even_sum += c as i32 - 48;
+        } else {
+            odd_sum += c as i32 - 48;
+        }
+    });
+    even_sum == odd_sum
+}
+
+pub fn min_bit_flips(start: i32, goal: i32) -> i32 {
+    if start == goal {
+        return 0;
+    }
+    let mut count = 0;
+    let mut start = start;
+    let mut goal = goal;
+    let mut ir = start % 2;
+    let mut jr = goal % 2;
+    while start > 0 || goal > 0 {
+        if ir != jr {
+            count += 1;
+        }
+        start /= 2;
+        goal /= 2;
+        ir = start % 2;
+        jr = goal % 2;
+    }
+    count
+}
+
+pub fn next_greater_element(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
+    let mut ans = vec![-1; nums2.len()];
+    for i in 0..nums1.len() {
+        let mut id = 0;
+        for j in 0..nums2.len() {
+            if nums1[i] == nums2[j] {
+                id = j;
+                break;
+            }
+        }
+        for j in (id + 1)..nums2.len() {
+            if nums1[i] < nums2[j] {
+                id = j;
+                ans[i] = nums2[j];
+                break;
+            }
+        }
+    }
+    ans
+}
+
+pub fn find_words(words: Vec<String>) -> Vec<String> {
+    let row = [
+        2, 3, 3, 2, 1, 2, 2, 2, 1, 2, 2, 2, 3, 3, 1, 1, 1, 1, 2, 1, 1, 3, 1, 3, 1, 3,
+    ];
+    let mut result = Vec::new();
+    for word in words {
+        let mut row_number_count = 0;
+        let mut row_number = 0;
+        word.chars().for_each(|mut c| {
+            let mut c = c as u8;
+            if (c > 90) {
+                c -= 32;
+            }
+            c -= 65;
+            if (row_number != row[c as usize]) {
+                row_number_count += 1;
+                row_number = row[c as usize];
+            }
+        });
+        if (row_number_count == 1) {
+            result.push(word);
+        }
+    }
+    result
+}
+
+pub fn find_relative_ranks(score: Vec<i32>) -> Vec<String> {
+    let mut result = Vec::new();
+    let mut min1 = i32::MAX;
+    let mut min2 = i32::MAX;
+    let mut min3 = i32::MAX;
+
+    for i in 0..score.len() {
+        if score[i] < min1 {
+            min3 = min2;
+            min2 = min1;
+            min1 = score[i];
+        } else if score[i] < min2 && score[i] > min1 {
+            min3 = min2;
+            min2 = score[i];
+        } else if score[i] < min3 && score[i] > min2 {
+            min3 = min2;
+        }
+    }
+    let mut s = score.len();
+    for x in score {
+        if min1 == x {
+            result.push(String::from("Gold Medal"));
+        } else if min2 == x {
+            result.push(String::from("Silver Medal"));
+        } else if min3 == x {
+            result.push(String::from("Bronze Medal"));
+        } else {
+            result.push(x.to_string());
+        }
+    }
+    result
+}
+
+pub fn find_relative_ranks2(score: Vec<i32>) -> Vec<String> {
+    let max = *score.iter().max().unwrap_or_else(|| &0);
+    let mut p = vec![0; (max + 1) as usize];
+
+    for (i, &s) in score.iter().enumerate() {
+        p[s as usize] = i + 1;
+    }
+
+    let mut ans = vec![String::new(); score.len()];
+    let mut rank = 1;
+
+    for i in (0..=max).rev() {
+        if p[i as usize] != 0 {
+            let id = p[i as usize] - 1;
+            ans[id] = match rank {
+                1 => "Gold Medal".to_string(),
+                2 => "Silver Medal".to_string(),
+                3 => "Bronze Medal".to_string(),
+                _ => rank.to_string(),
+            };
+            rank += 1;
+            if rank > score.len() {
+                return ans;
+            }
+        }
+    }
+    ans
+}
+
+pub fn matrix_reshape(mat: Vec<Vec<i32>>, r: i32, c: i32) -> Vec<Vec<i32>> {
+    if mat.len() * mat[0].len() != r as usize * c as usize {
+        return mat;
+    }
+    let r = r as usize;
+    let c = c as usize;
+    let mut mi = 0;
+    let mut mj = 0;
+    let mc = mat[0].len();
+    let mut res = vec![vec![0; c]; r];
+    for i in 0..r {
+        for j in 0..c {
+            res[i][j] = mat[mi][mj];
+            mj += 1;
+            if mj >= mc {
+                mi += 1;
+                mj = 0;
+            }
+        }
+    }
+    res
+}
+
+pub fn find_lhs(nums: Vec<i32>) -> i32 {
+    let mut nums = nums;
+    let mut max = 0;
+    let mut i = 0;
+    nums.sort_unstable();
+    for j in 0..nums.len() {
+        while nums[j] - nums[i] > 1 {
+            i += 1;
+        }
+        if nums[j] - nums[i] == 1 {
+            max = i32::max(max, (j - i) as i32 + 1);
+        }
+    }
+    max
+}
+
+pub fn find_error_nums(nums: Vec<i32>) -> Vec<i32> {
+    let n = nums.len();
+    let ns = n * (n + 1) / 2;
+    let mut m = vec![0; ns];
+    let mut d = 0;
+    let mut t = 0;
+    for num in nums {
+        if m[num as usize] == 1 {
+            d = num;
+        }
+        m[num as usize] += 1;
+        t += num;
+    }
+    vec![d, ns as i32 - t + d]
+}
+
+pub fn find_max_average(nums: Vec<i32>, k: i32) -> f64 {
+    let mut sum = 0;
+    let k = k as usize;
+    for i in 0..k{
+        sum+=nums[i];
+    }
+    let mut max = sum;
+    for i in k..nums.len(){
+        sum += nums[i] - nums[i-k];
+        max = i32::max(max,sum);
+    }
+    (max as f64)/(k as f64)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn matrix_reshape() {
+        assert_eq!(
+            super::matrix_reshape(vec![vec![1, 2], vec![3, 4]], 1, 4),
+            vec![vec![1, 2, 3, 4]]
+        )
+    }
+
+    #[test]
+    fn find_relative_ranks2() {
+        let response = super::find_relative_ranks2(vec![5, 4, 3, 2, 1]);
+        assert_eq!(
+            response,
+            vec![
+                "Gold Medal".to_string(),
+                "Silver Medal".to_string(),
+                "Bronze Medal".to_string(),
+                "4".to_string(),
+                "5".to_string()
+            ]
+        );
+    }
 
     #[test]
     fn first_uniq_char() {
