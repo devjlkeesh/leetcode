@@ -2,6 +2,7 @@ use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::ops::Add;
 use std::path::Component::ParentDir;
+use std::str::Chars;
 use std::vec;
 
 pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
@@ -765,8 +766,8 @@ pub fn largest_triangle_area(points: Vec<Vec<i32>>) -> f64 {
         f64::abs(
             0.5f64
                 * ((point1[0] * (point2[1] - point3[1])
-                    + point2[0] * (point3[1] - point1[1])
-                    + point3[0] * (point1[1] - point2[1])) as f64),
+                + point2[0] * (point3[1] - point1[1])
+                + point3[0] * (point1[1] - point2[1])) as f64),
         )
     }
     if points.len() == 3 {
@@ -2059,15 +2060,175 @@ pub fn find_error_nums(nums: Vec<i32>) -> Vec<i32> {
 pub fn find_max_average(nums: Vec<i32>, k: i32) -> f64 {
     let mut sum = 0;
     let k = k as usize;
-    for i in 0..k{
-        sum+=nums[i];
+    for i in 0..k {
+        sum += nums[i];
     }
     let mut max = sum;
-    for i in k..nums.len(){
-        sum += nums[i] - nums[i-k];
-        max = i32::max(max,sum);
+    for i in k..nums.len() {
+        sum += nums[i] - nums[i - k];
+        max = i32::max(max, sum);
     }
-    (max as f64)/(k as f64)
+    (max as f64) / (k as f64)
+}
+
+pub fn dominant_index(nums: Vec<i32>) -> i32 {
+    let mut m = [0; 101];
+    let mut m1 = i32::MIN;
+    let mut m2 = i32::MIN;
+    for i in 0..nums.len() {
+        let num = nums[i];
+        if num > m1 {
+            m2 = m1;
+            m1 = num;
+        } else if num > m2 && num < m1 {
+            m2 = num;
+        }
+        m[num as usize] = i;
+    }
+    if 2 * m2 <= m1 {
+        return m[m1 as usize] as i32;
+    }
+    -1
+}
+
+pub fn shortest_completing_word(license_plate: String, words: Vec<String>) -> String {
+    let mut m = [0; 26];
+    license_plate.chars().enumerate().for_each(|(i, c)| {
+        if c >= 'A' && c <= 'Z' {
+            m[c as usize - 65] += 1;
+        } else if c >= 'a' && c <= 'z' {
+            m[c as usize - 97] += 1;
+        }
+    });
+    fn compare(word: &String, m: &[i32; 26]) -> bool {
+        let mut tm = [0; 26];
+        word.chars().for_each(|c| {
+            tm[c as usize - 97] += 1;
+        });
+        for i in 0..26 {
+            if tm[i] < m[i] {
+                return false;
+            }
+        }
+        true
+    }
+    let mut idx = -1;
+    for i in 0..words.len() {
+        let word = &words[i];
+        if compare(word, &m) && (idx == -1 || words[i].len() < words[idx as usize].len()) {
+            idx = i as i32
+        }
+    }
+    words[idx as usize].clone()
+}
+
+pub fn is_toeplitz_matrix(matrix: Vec<Vec<i32>>) -> bool {
+    let m = matrix.len();
+    let n = matrix[0].len();
+    let mut i;
+    let mut j;
+    for c in 0..n {
+        i = 0;
+        j = c;
+        let prev = matrix[i][j];
+        while i < m && j < n {
+            if prev != matrix[i][j] {
+                return false;
+            }
+            i += 1;
+            j += 1;
+        }
+    }
+    for c in 1..m {
+        i = c;
+        j = 0;
+        let prev = matrix[i][j];
+        while i < m && j < n {
+            if prev != matrix[i][j] {
+                return false;
+            }
+            i += 1;
+            j += 1;
+        }
+    }
+    true
+}
+
+pub fn transpose(matrix: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
+    let m = matrix.len();
+    let n = matrix[0].len();
+    let mut transpose = vec![vec![0; m]; n];
+    for i in 0..m {
+        for j in 0..n {
+            transpose[i][j] = matrix[j][i];
+        }
+    }
+    transpose
+}
+
+
+pub fn unique_morse_representations(words: Vec<String>) -> i32 {
+    if words.len() <= 1 {
+        return words.len() as i32;
+    }
+    let morse = [".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.."];
+    fn transform(word: &String, morse: &[&str;26]) -> String {
+        let mut sb = String::with_capacity(word.len());
+        word.chars().for_each(|c| {
+            let a = morse[c  as usize - 97].clone();
+            sb.push_str(a);
+        });
+        sb
+    }
+    let mut set = HashSet::new();
+
+    for word in words {
+        set.insert(transform(&word, &morse));
+    }
+    set.len() as i32
+
+}
+
+pub fn number_of_lines(widths: Vec<i32>, s: String) -> Vec<i32> {
+    let mut l = 1;
+    let mut cur = 0;
+    s.chars().for_each(|c| {
+        let w = widths[c as usize - 97];
+        if cur + w > 100 {
+            l += 1;
+            cur = w;
+        } else {
+            cur += w;
+        }
+    });
+    vec![l, cur]
+}
+
+pub fn most_common_word(paragraph: String, banned: Vec<String>) -> String {
+    let mut map = HashMap::new();
+    let mut set: HashSet<_> = banned.into_iter().collect();
+    let mut sb = String::new();
+    paragraph.chars().for_each(|c| {
+        if (c == ' ' || c == '!' || c == '?' || c == ',' || c == ';' || c == '.') && !sb.is_empty()
+        {
+            if !set.contains(&sb) {
+                *map.entry(sb.clone()).or_insert(0) += 1;
+            }
+            sb = String::new();
+        }
+        if c.is_alphabetic() {
+            sb.push(c.to_ascii_lowercase());
+        }
+    });
+
+    if !sb.is_empty() && !set.contains(&sb) {
+        *map.entry(sb.clone()).or_insert(0) += 1;
+    }
+    map.iter()
+        .max_by_key(|e| e.1)
+        .map(|e| e.0.clone())
+        .unwrap()
+        .clone()
 }
 
 #[cfg(test)]
@@ -2525,7 +2686,7 @@ mod tests {
 
     #[test]
     fn max_count() {
-        assert_eq!(4, super::max_count(3, 3, vec![vec![2, 2,], vec![3, 3]]))
+        assert_eq!(4, super::max_count(3, 3, vec![vec![2, 2, ], vec![3, 3]]))
     }
 
     #[test]
