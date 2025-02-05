@@ -2231,6 +2231,24 @@ pub fn most_common_word(paragraph: String, banned: Vec<String>) -> String {
         .clone()
 }
 
+pub fn is_monotonic(nums: Vec<i32>) -> bool {
+    let n = nums.len();
+    if nums[0] > nums[n-1] {
+        for i in 0..(n-1) {
+            if nums[i] < nums[i+1] {
+                return false;
+            }
+        }
+    }else{
+        for i in 0..(n-1) {
+            if nums[i] > nums[i+1] {
+                return false;
+            }
+        }
+    }
+    true
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

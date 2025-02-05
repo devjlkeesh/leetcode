@@ -1,6 +1,7 @@
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, VecDeque};
 use std::future::Future;
+use std::process::id;
 
 pub fn string_sequence(target: String) -> Vec<String> {
     let mut result = Vec::new();
@@ -62,7 +63,7 @@ pub fn image_smoother(img: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
 }
 
 pub fn find_length_of_lcis(nums: Vec<i32>) -> i32 {
-    if nums.len() == 1{
+    if nums.len() == 1 {
         return 1;
     }
     let mut c = 1;
@@ -70,8 +71,8 @@ pub fn find_length_of_lcis(nums: Vec<i32>) -> i32 {
     let mut prev = nums[0];
     for num in nums {
         if num > prev {
-            c+=1
-        }else{
+            c += 1
+        } else {
             c = 1;
             max = i32::max(max, num);
         }
@@ -152,7 +153,7 @@ pub fn is_one_bit_character(bits: Vec<i32>) -> bool {
     let mut i = 0;
     while i < bits.len() - 1 {
         if bits[i] == 1 {
-            i+=1;
+            i += 1;
         }
     }
     i < bits.len()
@@ -162,15 +163,15 @@ pub fn search(nums: Vec<i32>, target: i32) -> i32 {
     let mut l = 0;
     let mut r = nums.len() - 1;
     while l <= r {
-        let m = l + (r-l)/2;
+        let m = l + (r - l) / 2;
         if nums[m] == target {
             return m as i32;
-        }else if nums[m] > target {
+        } else if nums[m] > target {
             if m == 0 {
                 return -1;
             }
             r = m - 1;
-        }else{
+        } else {
             l = m + 1;
         }
     }
@@ -191,11 +192,124 @@ pub fn next_greatest_letter(letters: Vec<char>, target: char) -> char {
 }
 
 pub fn min_cost_climbing_stairs(cost: Vec<i32>) -> i32 {
-    let mut dp = vec![0; cost.len()+2];
-    for i in (0..=(cost.len()-1)).rev(){
-        dp[i] = cost[i] + i32::min(dp[i+1],dp[i+2]);
+    let mut dp = vec![0; cost.len() + 2];
+    for i in (0..=(cost.len() - 1)).rev() {
+        dp[i] = cost[i] + i32::min(dp[i + 1], dp[i + 2]);
     }
-    i32::min(dp[0],dp[1])
+    i32::min(dp[0], dp[1])
+}
+
+/*
+public int[] minOperations(String boxes) {
+        int[] res = new int[boxes.length()];
+        for (int i = 0; i < boxes.length(); i++) {
+            int j = 0;
+            while (j < boxes.length()) {
+                if (j != i && boxes.charAt(j) == '1') {
+                    res[i]+=Math.abs(j-i);
+                }
+                j++;
+            }
+        }
+        return res;
+    }
+*/
+
+pub fn min_operations(boxes: String) -> Vec<i32> {
+    let mut ans = vec![0; boxes.len()];
+    let boxes_vec = boxes.chars().collect::<Vec<char>>();
+    for i in 0..boxes.len() {
+        let mut j = 0;
+        while j < boxes.len() {
+            if i != j && boxes_vec[j] == '1' {
+                ans[i] += i32::abs((j - i) as i32);
+            }
+            j += 1;
+        }
+    }
+    ans
+}
+
+pub fn is_acronym(words: Vec<String>, s: String) -> bool {
+    if s.is_empty() || s.len() != words.len() {
+        return false;
+    }
+    for (i, c) in s.chars().enumerate() {
+        if words[i].chars().next().unwrap() != c {
+            return false;
+        }
+    }
+    true
+}
+
+pub fn minimum_right_shifts(nums: Vec<i32>) -> i32 {
+    let n = nums.len();
+    if nums[n - 1] > nums[0] {
+        return -1;
+    }
+    let mut idx = n + 1;
+    for i in 1..n {
+        if nums[i - 1] > nums[i] {
+            if idx != n + 1 {
+                return -1;
+            }
+            idx = i;
+        }
+    }
+    if idx == n + 1 {
+        return 0;
+    }
+    (n - idx) as i32
+}
+
+pub fn sum_indices_with_k_set_bits(nums: Vec<i32>, k: i32) -> i32 {
+    let mut sum = 0;
+    let k = k as u32;
+    nums.iter().enumerate().for_each(|(i, num)| {
+        if i.count_ones() == k {
+            sum += num;
+        }
+    });
+    sum
+}
+
+pub fn min_operations_2869(nums: Vec<i32>, k: i32) -> i32 {
+    let mut mark = 0;
+    let mut count = 0;
+    let mut arr = vec![0; k as usize + 1];
+    for i in (0..nums.len()).rev() {
+        if mark == k {
+            break;
+        }
+        let num = nums[i];
+        if num <= k && arr[i] == 0 {
+            mark += 1;
+            arr[num as usize] = 1;
+        }
+        count += 1;
+    }
+    count
+}
+
+pub fn last_visited_integers(nums: Vec<i32>) -> Vec<i32> {
+    let mut seen = vec![];
+    let mut ans = vec![];
+    let mut k = 0usize;
+
+    for num in nums {
+        if num != -1 {
+            seen.push(num);
+            k = 0;
+        } else {
+            ans.push(if seen.len() > k {
+                seen[seen.len() - k - 1]
+            } else {
+                -1
+            });
+            k += 1;
+        }
+    }
+    ans
 }
 
 #[cfg(test)]
