@@ -312,6 +312,83 @@ pub fn last_visited_integers(nums: Vec<i32>) -> Vec<i32> {
     ans
 }
 
+pub fn find_indices(nums: Vec<i32>, index_difference: i32, value_difference: i32) -> Vec<i32> {
+    for i in 0..nums.len() {
+        for j in 0..nums.len() {
+            if i32::abs((i - j) as i32) >= index_difference
+                && i32::abs(nums[i] - nums[j]) >= value_difference
+            {
+                return vec![i as i32, j as i32];
+            }
+        }
+    }
+    vec![-1, -2]
+}
+
+pub fn minimum_sum(nums: Vec<i32>) -> i32 {
+    let n = nums.len();
+    if n < 3 {
+        return -1;
+    }
+    let mut left_min = vec![0; n];
+    let mut right_min = vec![0; n];
+    left_min[0] = i32::MAX;
+    right_min[n - 1] = i32::MIN;
+
+    for i in 1..n {
+        left_min[i] = i32::min(left_min[i - 1], nums[i - 1]);
+    }
+    for i in (0..=(n - 2)).rev() {
+        right_min[i] = i32::min(right_min[i + 1], nums[i + 1]);
+    }
+
+    let mut min_sum = i32::MAX;
+    for i in 1..(n - 1) {
+        if left_min[i] < nums[i] && nums[i] > right_min[i] {
+            min_sum = i32::min(min_sum, left_min[i] + nums[i] + right_min[i]);
+        }
+    }
+    if min_sum == i32::MAX {
+        -1
+    } else {
+        min_sum
+    }
+}
+
+
+
+// Definition for singly-linked list.
+#[derive(PartialEq, Eq, Clone, Debug)]
+pub struct ListNode {
+    pub val: i32,
+    pub next: Option<Box<ListNode>>,
+}
+
+impl ListNode {
+    #[inline]
+    pub fn new(val: i32) -> Self {
+        ListNode { next: None, val }
+    }
+
+    pub fn build_from(vec: Vec<i32>) -> Option<Box<ListNode>> {
+        let mut dummy = Box::new(ListNode::new(0));
+        let mut current = &mut dummy;
+        for i in vec {
+            current.next = Some(Box::new(ListNode::new(i)));
+            current = current.next.as_mut().unwrap();
+        }
+        dummy.next
+    }
+
+    pub fn show(list: &Option<Box<ListNode>>) {
+        let mut cur = list;
+        while let Some(node) = cur {
+            print!("{} ", node.val);
+            cur = &node.next;
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

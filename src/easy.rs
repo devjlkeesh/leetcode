@@ -1,6 +1,7 @@
+use crate::medium::ListNode;
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashMap, HashSet};
-use std::ops::Add;
+use std::ops::{Add, Index};
 use std::path::Component::ParentDir;
 use std::str::Chars;
 use std::vec;
@@ -130,18 +131,6 @@ pub fn remove_duplicates(nums: &mut Vec<i32>) -> i32 {
     k as i32
 }
 
-#[derive(PartialEq, Eq, Clone, Debug)]
-pub struct ListNode {
-    pub val: i32,
-    pub next: Option<Box<ListNode>>,
-}
-
-impl ListNode {
-    #[inline]
-    pub fn new(val: i32) -> Self {
-        ListNode { next: None, val }
-    }
-}
 pub fn merge_two_lists(
     list1: Option<Box<ListNode>>,
     list2: Option<Box<ListNode>>,
@@ -766,8 +755,8 @@ pub fn largest_triangle_area(points: Vec<Vec<i32>>) -> f64 {
         f64::abs(
             0.5f64
                 * ((point1[0] * (point2[1] - point3[1])
-                + point2[0] * (point3[1] - point1[1])
-                + point3[0] * (point1[1] - point2[1])) as f64),
+                    + point2[0] * (point3[1] - point1[1])
+                    + point3[0] * (point1[1] - point2[1])) as f64),
         )
     }
     if points.len() == 3 {
@@ -2166,16 +2155,19 @@ pub fn transpose(matrix: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
     transpose
 }
 
-
 pub fn unique_morse_representations(words: Vec<String>) -> i32 {
     if words.len() <= 1 {
         return words.len() as i32;
     }
-    let morse = [".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.."];
-    fn transform(word: &String, morse: &[&str;26]) -> String {
+    let morse = [
+        ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--",
+        "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--",
+        "--..",
+    ];
+    fn transform(word: &String, morse: &[&str; 26]) -> String {
         let mut sb = String::with_capacity(word.len());
         word.chars().for_each(|c| {
-            let a = morse[c  as usize - 97].clone();
+            let a = morse[c as usize - 97].clone();
             sb.push_str(a);
         });
         sb
@@ -2186,7 +2178,6 @@ pub fn unique_morse_representations(words: Vec<String>) -> i32 {
         set.insert(transform(&word, &morse));
     }
     set.len() as i32
-
 }
 
 pub fn number_of_lines(widths: Vec<i32>, s: String) -> Vec<i32> {
@@ -2233,17 +2224,127 @@ pub fn most_common_word(paragraph: String, banned: Vec<String>) -> String {
 
 pub fn is_monotonic(nums: Vec<i32>) -> bool {
     let n = nums.len();
-    if nums[0] > nums[n-1] {
-        for i in 0..(n-1) {
-            if nums[i] < nums[i+1] {
+    if nums[0] > nums[n - 1] {
+        for i in 0..(n - 1) {
+            if nums[i] < nums[i + 1] {
                 return false;
             }
         }
-    }else{
-        for i in 0..(n-1) {
-            if nums[i] > nums[i+1] {
+    } else {
+        for i in 0..(n - 1) {
+            if nums[i] > nums[i + 1] {
                 return false;
             }
+        }
+    }
+    true
+}
+
+pub fn get_decimal_value(head: Option<Box<ListNode>>) -> i32 {
+    let mut sb = String::from("");
+    let mut curr = &head;
+    while let Some(node) = curr {
+        sb.push((node.val + b'0' as i32) as u8 as char);
+        curr = &node.next;
+    }
+    i32::from_str_radix(&sb, 2).unwrap()
+}
+
+pub fn buddy_strings(s: String, goal: String) -> bool {
+    let n = s.len();
+    if n != goal.len() {
+        return false;
+    }
+    let mut map = [0; 26];
+    let s_chars: Vec<char> = s.chars().collect();
+    if s.eq(&goal) {
+        for i in 0..n {
+            map[s_chars[i] as usize - 97] += 1;
+            if map[s_chars[i] as usize - 97] > 1 {
+                return true;
+            }
+        }
+        return false;
+    }
+    let goal_chars: Vec<char> = goal.chars().collect();
+    let mut i = 20_002;
+    let mut j = 20_002;
+    for k in 0..n {
+        if s_chars[k] != goal_chars[k] {
+            if i == 20_002 {
+                i = k;
+            } else if j == 20_002 {
+                j = k;
+            } else {
+                return false;
+            }
+        }
+    }
+    j != 20_002 && s_chars[i] == goal_chars[j] && s_chars[j] == goal_chars[i]
+}
+
+pub fn uncommon_from_sentences(s1: String, s2: String) -> Vec<String> {
+    let mut map = HashMap::new();
+    s1.split(' ').for_each(|s| {
+        if map.contains_key(s) {
+            map.insert(s, -1);
+        } else {
+            map.insert(s, 0);
+        }
+    });
+    let mut uncommon_words = vec![];
+    s2.split(' ').for_each(|s| {
+        if map.contains_key(s) {
+            map.insert(s, -1);
+        } else {
+            map.insert(s, 0);
+        }
+    });
+    map.iter().filter(|(k, v)| **v == 0).for_each(|(k, v)| {
+        uncommon_words.push(k.to_string());
+    });
+    uncommon_words
+}
+
+pub fn num_unique_emails(emails: Vec<String>) -> i32 {
+    let mut set = HashSet::new();
+    for email in emails {
+        // Slice the email into local and domain parts.
+        let at_index = email.find('@').unwrap();
+        let local = &email[..at_index];
+        let domain = &email[at_index..]; // Includes the '@'
+        let mut normalized_local = String::new();
+
+        // Process the local part: skip '.' and stop at '+'
+        for ch in local.chars() {
+            if ch == '+' {
+                break;
+            }
+            if ch != '.' {
+                normalized_local.push(ch);
+            }
+        }
+        let normalized_email = normalized_local + domain;
+        set.insert(normalized_email);
+    }
+    set.len() as i32
+}
+
+pub fn is_anagram(s: String, t: String) -> bool {
+    let n = s.len();
+    if n != t.len() {
+        return false;
+    }
+    let s_chars: Vec<char> = s.chars().collect();
+    let t_chars: Vec<char> = t.chars().collect();
+    let mut map = [0;26];
+    for i in 0..n {
+        map[s_chars[i] as usize - 97] += 1;
+        map[t_chars[i] as usize - 97] -= 1;
+    }
+    for x in map {
+        if x != 0 {
+            return false;
         }
     }
     true
@@ -2704,7 +2805,7 @@ mod tests {
 
     #[test]
     fn max_count() {
-        assert_eq!(4, super::max_count(3, 3, vec![vec![2, 2, ], vec![3, 3]]))
+        assert_eq!(4, super::max_count(3, 3, vec![vec![2, 2,], vec![3, 3]]))
     }
 
     #[test]
