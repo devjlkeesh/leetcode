@@ -1,6 +1,6 @@
 use crate::medium::ListNode;
 use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
 use std::ops::{Add, Index};
 use std::path::Component::ParentDir;
 use std::str::Chars;
@@ -2337,7 +2337,7 @@ pub fn is_anagram(s: String, t: String) -> bool {
     }
     let s_chars: Vec<char> = s.chars().collect();
     let t_chars: Vec<char> = t.chars().collect();
-    let mut map = [0;26];
+    let mut map = [0; 26];
     for i in 0..n {
         map[s_chars[i] as usize - 97] += 1;
         map[t_chars[i] as usize - 97] -= 1;
@@ -2350,9 +2350,452 @@ pub fn is_anagram(s: String, t: String) -> bool {
     true
 }
 
+pub fn word_pattern(pattern: String, s: String) -> bool {
+    let words: Vec<&str> = s.split_whitespace().collect();
+    let pattern_chars: Vec<char> = pattern.chars().collect();
+
+    if words.len() != pattern_chars.len() {
+        return false;
+    }
+
+    let mut word_to_char: HashMap<&str, char> = HashMap::new();
+    let mut used_chars: HashSet<char> = HashSet::new();
+
+    for (word, &ch) in words.iter().zip(pattern_chars.iter()) {
+        if let Some(&mapped_ch) = word_to_char.get(word) {
+            if mapped_ch != ch {
+                return false;
+            }
+        } else {
+            if used_chars.contains(&ch) {
+                return false;
+            }
+            used_chars.insert(ch);
+            word_to_char.insert(word, ch);
+        }
+    }
+
+    true
+}
+
+pub fn find_the_difference(s: String, t: String) -> char {
+    let mut map = [0; 26];
+    let n = s.len();
+    let s_chars: Vec<char> = s.chars().collect();
+    let t_chars: Vec<char> = t.chars().collect();
+    for i in 0..n {
+        map[t_chars[i] as usize - 97] += 1;
+        map[s_chars[i] as usize - 97] -= 1;
+    }
+    map[t_chars[n] as usize - 97] += 1;
+    for i in 0..26 {
+        if map[i] > 0 {
+            return (i as u8 + 97) as char;
+        }
+    }
+    '0'
+}
+
+pub fn relative_sort_array(arr1: Vec<i32>, arr2: Vec<i32>) -> Vec<i32> {
+    let mut count = vec![0; 1001];
+    let mut result = Vec::with_capacity(arr1.len());
+
+    for &num in &arr1 {
+        count[num as usize] += 1;
+    }
+    for &num in &arr2 {
+        while count[num as usize] > 0 {
+            result.push(num);
+            count[num as usize] -= 1;
+        }
+    }
+    for num in 0..1001 {
+        while count[num] > 0 {
+            result.push(num as i32);
+            count[num] -= 1;
+        }
+    }
+    result
+}
+
+pub fn count_characters(words: Vec<String>, chars: String) -> i32 {
+    let mut count = [0; 26];
+    let mut result = 0;
+    chars.chars().for_each(|ch| {
+        count[ch as usize - 97] += 1;
+    });
+    let mut count2 = [0; 26];
+    for word in words {
+        let mut a = word.len();
+        word.chars().for_each(|ch| {
+            count2[ch as usize - 97] += 1;
+        });
+        for i in 0..26 {
+            if (count[i] < count2[i]) {
+                a = 0;
+                count2 = [0; 26];
+                break;
+            }
+            count2[i] = 0;
+        }
+        result += a as i32;
+    }
+    result
+}
+
+/*
+public boolean uniqueOccurrences(int[] arr) {
+        int[] count = new int[2001];
+        for (int num : arr) {
+            count[num + 1000]++;
+        }
+        int uniqueCount = 0;
+        Set<Integer> set = new HashSet<>();
+        for (int i : count) {
+            if (i > 0) {
+                uniqueCount++;
+                set.add(i);
+            }
+        }
+        return set.size() == uniqueCount;
+    }
+ */
+
+/*
+int[] count = new int[2001];
+        for (int num : arr) {
+            count[num + 1000]++;
+        }
+        int uniqueCount = 0;
+        Set<Integer> set = new HashSet<>();
+        for (int i : count) {
+            if (i > 0) {
+                uniqueCount++;
+                set.add(i);
+            }
+        }
+        return set.size() == uniqueCount;
+*/
+pub fn unique_occurrences(arr: Vec<i32>) -> bool {
+    let mut count = [0; 2001];
+    for num in &arr {
+        count[*num as usize + 1000] += 1;
+    }
+    let mut u_count = 0;
+    let mut set = HashSet::new();
+    for i in count {
+        if i > 0 {
+            u_count += 1;
+            set.insert(i);
+        }
+    }
+    set.len() == u_count
+}
+
+pub fn max_number_of_balloons(text: String) -> i32 {
+    let mut b = 0;
+    let mut a = 0;
+    let mut l = 0;
+    let mut o = 0;
+    let mut n = 0;
+    text.chars().for_each(|ch| match ch {
+        'a' => a += 1,
+        'b' => b += 1,
+        'o' => o += 1,
+        'l' => l += 1,
+        'n' => n += 1,
+        _ => {}
+    });
+    o /= 2;
+    l /= 2;
+    i32::min(i32::min(a, b), i32::min(o, i32::min(n, l)))
+}
+
+pub fn num_equiv_domino_pairs(dominoes: Vec<Vec<i32>>) -> i32 {
+    let mut result = 0;
+    for i in 0..(dominoes.len() - 1) {
+        let p1 = &dominoes[i];
+        for j in (i + 1)..dominoes.len() {
+            let p2 = &dominoes[j];
+            if p1[0] == p2[0] && p1[1] == p2[1] || p1[0] == p2[1] && p1[1] == p2[0] {
+                result += 1;
+            }
+        }
+    }
+    result
+}
+
+pub fn clear_digits(s: String) -> String {
+    let mut chs: Vec<char> = s.chars().collect();
+    let mut stack = Vec::new();
+
+    for i in 0..chs.len() {
+        if chs[i].is_ascii_digit() {
+            if let Some(idx) = stack.pop() {
+                chs[idx] = '-';
+            }
+            chs[i] = '-';
+        } else {
+            stack.push(i);
+        }
+    }
+
+    chs.into_iter().filter(|&ch| ch != '-').collect()
+}
+
+pub fn backspace_compare(s: String, t: String) -> bool {
+    fn trim(s: String) -> String {
+        let mut sb = String::new();
+        let mut hc = 0;
+        s.chars().rev().for_each(|ch| {
+            if ch == '#' {
+                hc += 1;
+            } else if hc > 0 {
+                hc -= 1;
+            } else {
+                sb.push(ch);
+            }
+        });
+        sb
+    }
+    trim(s) == trim(t)
+}
+
+pub fn min_length(s: String) -> i32 {
+    let mut stack = Vec::new();
+    s.chars().for_each(|ch| {
+        if stack.is_empty() {
+            stack.push(ch);
+        } else if ch == 'B' && *stack.last().unwrap() == 'A'
+            || ch == 'D' && *stack.last().unwrap() == 'C'
+        {
+            stack.pop();
+        } else {
+            stack.push(ch);
+        }
+    });
+    stack.len() as i32
+}
+
+pub fn reverse_prefix(word: String, ch: char) -> String {
+    if let Some(idx) = word.find(ch) {
+        let word_chars: Vec<char> = word.chars().collect();
+        let mut answer = word_chars.clone();
+        let mut j = 0;
+        for i in (0..=idx).rev() {
+            answer[j] = word_chars[i];
+            j += 1;
+        }
+        return answer.iter().collect();
+    }
+    word
+}
+
+pub fn count_students(students: Vec<i32>, sandwiches: Vec<i32>) -> i32 {
+    let mut queue = VecDeque::new();
+    for x in students {
+        queue.push_back(x);
+    }
+    let mut i = 0;
+    let mut failed_attempt = 0;
+    while !queue.is_empty() {
+        let s = queue.pop_front().unwrap();
+        if sandwiches[i] == s {
+            queue.pop_front();
+            i += 1;
+            failed_attempt = 0;
+        } else {
+            failed_attempt += 1;
+            queue.push_back(s);
+        }
+        if failed_attempt == queue.len() {
+            return failed_attempt as i32;
+        }
+    }
+    0
+}
+
+pub fn max_depth(s: String) -> i32 {
+    let mut lc = 0;
+    let mut rc = 0;
+    let mut max = 0;
+    s.chars().for_each(|ch| {
+        if ch == '(' {
+            lc += 1;
+            max = max.max(lc - rc);
+        } else if ch == ')' {
+            rc += 1;
+            max = max.max(lc - rc);
+        }
+    });
+    max
+}
+
+pub fn min_operations(logs: Vec<String>) -> i32 {
+    let mut n = 0;
+    for log in logs {
+        if log.eq("../") {
+            if n > 0 {
+                n -= 1;
+            }
+        } else if !log.eq("./") {
+            n += 1;
+        }
+    }
+    n
+}
+
+pub fn min_operations2(logs: Vec<String>) -> i32 {
+    let mut stack = Vec::new();
+    for log in logs {
+        if log.eq("../") {
+            if !stack.is_empty() {
+                stack.pop();
+            }
+        } else if !log.eq("./") {
+            stack.push(log);
+        }
+    }
+    stack.len() as i32
+}
+
+pub fn make_good(s: String) -> String {
+    let mut stack: Vec<char> = Vec::new();
+    s.chars().for_each(|ch| {
+        if stack.is_empty() {
+            stack.push(ch);
+        } else {
+            let bch = *stack.last().unwrap();
+            if i32::abs(bch as i32 - ch as i32) == 32 {
+                stack.pop();
+            } else {
+                stack.push(ch);
+            }
+        }
+    });
+    stack.iter().collect()
+}
+
+pub fn final_prices(prices: Vec<i32>) -> Vec<i32> {
+    let mut prices = prices;
+    let n = prices.len();
+    for i in 0..n {
+        let mut discount = 0;
+        for j in (i + 1)..n {
+            if prices[i] >= prices[j] {
+                discount = prices[j];
+                break;
+            }
+        }
+        prices[i] -= discount;
+    }
+    prices
+}
+pub fn remove_duplicates1047(s: String) -> String {
+    let mut chars: Vec<char> = s.chars().collect();
+    let mut i = 0;
+    for j in 0..chars.len() {
+        if i > 0 && chars[j] == chars[i - 1] {
+            i -= 1;
+        } else {
+            chars[i] = chars[j];
+            i += 1;
+        }
+    }
+    chars[0..i].iter().collect()
+}
+
+pub fn remove_duplicates1047_v2(s: String) -> String {
+    let mut stack = Vec::new();
+    s.chars().for_each(|ch| {
+        if !stack.is_empty() && *stack.last().unwrap() == ch {
+            stack.pop();
+        } else {
+            stack.push(ch);
+        }
+    });
+    stack.iter().collect()
+}
+
+pub fn time_required_to_buy(tickets: Vec<i32>, k: i32) -> i32 {
+    let mut stack = tickets
+        .into_iter()
+        .enumerate()
+        .collect::<VecDeque<(usize, i32)>>();
+    let mut time = 0;
+    while let Some((i, mut v)) = stack.pop_front() {
+        time += 1;
+        v -= 1;
+        if v > 0 {
+            stack.push_back((i, v));
+        } else if i == k as usize {
+            break;
+        }
+    }
+    time
+}
+
+/*struct RecentCounter {
+    queue: VecDeque<i32>,
+}*/
+
+/*impl RecentCounter {
+
+    fn new() -> Self {
+        Self{
+            queue: VecDeque::new(),
+        }
+    }
+
+    fn ping(&mut self, t: i32) -> i32 {
+        while !self.queue.is_empty() && t-*self.queue.front().unwrap() > 3000{
+            self.queue.pop_front();
+        }
+        self.queue.push_front(t);
+        self.queue.len() as i32
+    }
+}*/
+
+struct RecentCounter {
+    queue: Vec<i32>,
+    i: usize,
+    j: usize,
+}
+
+impl RecentCounter {
+    fn new() -> Self {
+        Self {
+            queue: vec![0; 10_000],
+            i: 0,
+            j: 0,
+        }
+    }
+
+    fn ping(&mut self, t: i32) -> i32 {
+        while self.i < self.j && t - self.queue[self.i] > 3000 {
+            self.i += 1;
+        }
+        self.queue[self.j] = t;
+        self.j += 1;
+        (self.j - self.i) as i32
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn clear_digits() {
+        assert_eq!(super::clear_digits("abc".to_string()), "abc".to_string());
+        assert_eq!(super::clear_digits("cba23".to_string()), "c".to_string());
+        assert_eq!(super::clear_digits("ca23".to_string()), "".to_string());
+    }
+
+    #[test]
+    fn word_pattern() {
+        // assert_eq!(super::word_pattern("dog cat cat".to_string(), String::from("abb")), true);
+    }
 
     #[test]
     fn matrix_reshape() {
