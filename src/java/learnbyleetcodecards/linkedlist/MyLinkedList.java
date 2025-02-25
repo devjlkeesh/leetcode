@@ -1,10 +1,7 @@
 package learnbyleetcodecards.linkedlist;
 
-
-public class MyLinkedList {
-
-    private Node head;
-    private Node tail;
+class MyLinkedList {
+    private Node head, tail;
     private int size;
 
     public MyLinkedList() {
@@ -17,27 +14,41 @@ public class MyLinkedList {
         if (index < 0 || index >= size) {
             return -1;
         }
-        Node temp = head;
-        for (int i = 0; i < index; i++) {
-            temp = temp.next;
+        Node current;
+        if (index < size / 2) {
+            current = head;
+            for (int i = 0; i < index; i++) {
+                current = current.next;
+            }
+        } else {
+            current = tail;
+            for (int i = size - 1; i > index; i--) {
+                current = current.prev;
+            }
         }
-        return temp.val;
+        return current.val;
     }
 
     public void addAtHead(int val) {
-        Node newNode = new Node(val, head);
-        head = newNode;
-        if (size == 0) {
+        Node newNode = new Node(val);
+        if (head == null) {
+            head = newNode;
             tail = newNode;
+        } else {
+            newNode.next = head;
+            head.prev = newNode;
+            head = newNode;
         }
         size++;
     }
 
     public void addAtTail(int val) {
         Node newNode = new Node(val);
-        if (size == 0) {
-            head = tail = newNode;
+        if (tail == null) {
+            head = newNode;
+            tail = newNode;
         } else {
+            newNode.prev = tail;
             tail.next = newNode;
             tail = newNode;
         }
@@ -45,21 +56,37 @@ public class MyLinkedList {
     }
 
     public void addAtIndex(int index, int val) {
-        if (index > size || index < 0) {
+        if (index < 0 || index > size) {
             return;
         }
         if (index == 0) {
             addAtHead(val);
-        } else if (index == size) {
-            addAtTail(val);
-        } else {
-            Node prev = head;
-            for (int i = 0; i < index - 1; i++) {
-                prev = prev.next;
-            }
-            prev.next = new Node(val, prev.next);
-            size++;
+            return;
         }
+        if (index == size) {
+            addAtTail(val);
+            return;
+        }
+
+        Node current;
+        if (index < size / 2) {
+            current = head;
+            for (int i = 0; i < index; i++) {
+                current = current.next;
+            }
+        } else {
+            current = tail;
+            for (int i = size - 1; i > index; i--) {
+                current = current.prev;
+            }
+        }
+
+        Node newNode = new Node(val);
+        newNode.next = current;
+        newNode.prev = current.prev;
+        current.prev.next = newNode;
+        current.prev = newNode;
+        size++;
     }
 
     public void deleteAtIndex(int index) {
@@ -68,67 +95,76 @@ public class MyLinkedList {
         }
         if (index == 0) {
             head = head.next;
-            if (size == 1) {
+            if (head == null) {
                 tail = null;
+            } else {
+                head.prev = null;
+            }
+        } else if (index == size - 1) {
+            tail = tail.prev;
+            if (tail == null) {
+                head = null;
+            } else {
+                tail.next = null;
             }
         } else {
-            Node prev = head;
-            for (int i = 0; i < index - 1; i++) {
-                prev = prev.next;
+            Node current;
+            if (index < size / 2) {
+                current = head;
+                for (int i = 0; i < index; i++) {
+                    current = current.next;
+                }
+            } else {
+                current = tail;
+                for (int i = size - 1; i > index; i--) {
+                    current = current.prev;
+                }
             }
-            prev.next = prev.next.next;
-            if (index == size - 1) {
-                tail = prev;
+            current.prev.next = current.next;
+            if (current.next != null) {
+                current.next.prev = current.prev;
             }
         }
+
         size--;
     }
 
     static class Node {
         int val;
-        Node next;
+        Node next, prev;
 
         public Node(int val) {
             this.val = val;
         }
-
-        public Node(int val, Node next) {
-            this.val = val;
-            this.next = next;
-        }
     }
 
-    @Override
-    public String toString() {
-        String res = "Node{";
-        Node temp = head;
-        while (temp != null) {
-            res += temp.val + "->";
-            temp = temp.next;
-        }
-        res += "}";
-        return res;
-    }
 
     public static void main(String[] args) {
         // [[],[1],[3],[1,2],[1],[1],[1]]
-        MyLinkedList ml = new MyLinkedList();
-        ml.addAtHead(1);
-        ml.addAtTail(3);
-        ml.addAtIndex(1, 2);
-        System.out.println(ml.get(1));
-        ml.deleteAtIndex(1);
-        System.out.println(ml.get(1));
-        System.out.println(ml);
-        ml = new MyLinkedList();
-        ml.addAtTail(4);
-        ml.get(1);
-        ml.addAtHead(1);
-        ml.addAtHead(5);
-        ml.deleteAtIndex(3);
-        ml.addAtHead(7);
-        ml.addAtHead(1);
-        ml.deleteAtIndex(4);
+//        MyLinkedList ml = new MyLinkedList();
+//        ml.addAtHead(1);
+//        ml.addAtHead(3);
+//        ml.addAtHead(6);
+//        ml.addAtHead(9);
+//        System.out.println(ml);
+//        ml.addAtTail(5);
+//        ml.addAtTail(15);
+//        ml.addAtTail(25);
+//        ml.addAtIndex(0, 123);
+//        System.out.println(ml);
+//        ml.addAtIndex(3, 13);
+//        System.out.println(ml);
+//        ml.deleteAtIndex(3);
+//        System.out.println(ml);
+
+        MyLinkedList obj = new MyLinkedList();
+        obj.addAtHead(1);
+        obj.addAtTail(3);
+        obj.addAtIndex(1, 2);
+        System.out.println(obj);
+        System.out.println(obj.get(1)); // Expected output: 2
+        obj.deleteAtIndex(1);
+        System.out.println(obj.get(1)); // Expected output: 3
     }
 
 }
